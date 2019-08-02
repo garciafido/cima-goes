@@ -7,11 +7,11 @@ from netCDF4 import Dataset
 
 class GoesData(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def get_grouped_blobs(self, year: int, day_of_year: int, hour: int, bands: List[ProductBand]) -> List[GroupedBandBlobs]:
+    def grouped_one_hour_blobs(self, year: int, day_of_year: int, hour: int, bands: List[ProductBand]) -> List[GroupedBandBlobs]:
         pass
 
     @abc.abstractmethod
-    def get_blobs(self, year: int, day_of_year: int, hour: int, product_band: ProductBand) -> BandBlobs:
+    def one_hour_blobs(self, year: int, day_of_year: int, hour: int, product_band: ProductBand) -> BandBlobs:
         pass
 
     @abc.abstractmethod
