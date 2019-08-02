@@ -65,9 +65,9 @@ def generate_tiles(goes_info: goesdata_info,
                    lon_east: float,
                    lat_step: float,
                    lon_step: float,
-                   lon_overlap: float,
-                   lat_overlap: float,
-                   workers=2,
+                   lon_overlap: float = 0,
+                   lat_overlap: float = 0,
+                   workers = 2,
                    ) -> BandTilesDict:
     tasks = []
     for band in bands:
