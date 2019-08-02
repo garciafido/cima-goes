@@ -1,0 +1,19 @@
+import abc
+from typing import List, Tuple
+from cima.goes.storage._blobs import GroupedBandBlobs, GoesBlob, BandBlobs
+from cima.goes import ProductBand
+from netCDF4 import Dataset
+
+
+class GoesData(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def get_grouped_blobs(self, year: int, day_of_year: int, hour: int, bands: List[ProductBand]) -> List[GroupedBandBlobs]:
+        pass
+
+    @abc.abstractmethod
+    def get_blobs(self, year: int, day_of_year: int, hour: int, product_band: ProductBand) -> BandBlobs:
+        pass
+
+    @abc.abstractmethod
+    def get_dataset(self, blob: GoesBlob) -> Dataset:
+        pass

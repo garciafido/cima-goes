@@ -1,0 +1,10 @@
+google-cloud-storage
+google-colab
+netCDF4
+pyproj
+cython
+cartopy
+numpy
+psutil
+aioftp
+aiofiles
