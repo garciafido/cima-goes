@@ -8,8 +8,9 @@ from cima.goes import Band, Product, ProductBand
 from cima.goes import GoesData
 from cima.goes.storage._blobs import BandBlobs
 from cima.goes.tasks import Task, run_concurrent
-from cima.goes.storage._file_systems import goesdata_info, storage_info
-from cima.goes.storage._factories import mount_goesdata, mount_store
+from cima.goes.storage._file_systems import storage_info
+from cima.goes.storage._file_systems import Storage
+from cima.goes.storage._factories import mount_goes_storage
 
 try:
     import numpy as np
@@ -57,7 +58,7 @@ class BandTiles:
 BandTilesDict = Dict[Tuple[Product, Band], Dict[str, Tile]]
 
 
-def generate_tiles(goes_info: goesdata_info,
+def generate_tiles(goes_storage: GoesData,
                    bands: List[ProductBand],
                    lat_south: float,
                    lat_north: float,
@@ -73,7 +74,7 @@ def generate_tiles(goes_info: goesdata_info,
     for band in bands:
         tasks.append(
             Task(_get_indexed_tiles,
-                 goes_info,
+                 goes_storage.get_storage_info(),
                  band,
                  lat_south=lat_south, lat_north=lat_north,
                  lon_west=lon_west, lon_east=lon_east,
@@ -93,8 +94,8 @@ def generate_tiles(goes_info: goesdata_info,
     return band_tiles_dict
 
 
-def _get_indexed_tiles(goes_info: goesdata_info, band: ProductBand, **kwargs) -> BandTiles:
-    goesdata: GoesData = mount_goesdata(goes_info)
+def _get_indexed_tiles(goes_info: storage_info, band: ProductBand, **kwargs) -> BandTiles:
+    goesdata: GoesData = mount_goes_storage(goes_info)
     band_blobs: BandBlobs = goesdata.one_hour_blobs(2018, 360, 12, band)
     dataset = goesdata.get_dataset(band_blobs.blobs[0])
     try:
@@ -105,7 +106,7 @@ def _get_indexed_tiles(goes_info: goesdata_info, band: ProductBand, **kwargs) ->
         dataset.close()
 
 
-def save_tiles(store_info: storage_info, filepath: str, band_tiles_dict: BandTilesDict):
+def save_tiles(storage: Storage, filepath: str, band_tiles_dict: BandTilesDict):
     tiles_dict = {}
     for product_band, tiles in band_tiles_dict.items():
         tiles: Dict[str, Tile]
@@ -117,13 +118,11 @@ def save_tiles(store_info: storage_info, filepath: str, band_tiles_dict: BandTil
     in_memory_file = io.BytesIO()
     in_memory_file.write(data)
     in_memory_file.seek(0)
-    store = mount_store(store_info)
-    store.upload_stream(in_memory_file, filepath)
+    storage.upload_stream(in_memory_file, filepath)
 
 
-def load_tiles(store_info: storage_info, filepath) -> BandTilesDict:
-    store = mount_store(store_info)
-    data = store.download_stream(filepath)
+def load_tiles(storage: Storage, filepath) -> BandTilesDict:
+    data = storage.download_stream(filepath)
     tiles_dict = json.loads(data)
     return get_tiles_from_dict(tiles_dict)
 

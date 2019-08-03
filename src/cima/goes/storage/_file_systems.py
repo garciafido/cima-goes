@@ -22,18 +22,11 @@ class storage_info:
     kwargs: Dict = None
 
 
-@dataclass
-class goesdata_info(storage_info):
-    def __init__(self, stype: storage_type, *args, **kwargs):
-        self.stype = stype
-        self.args = args if args else ()
-        self.kwargs = kwargs if kwargs else {}
-    stype: storage_type
-    args: Tuple = None
-    kwargs: Dict = None
-
-
 class Storage(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def get_storage_info(self) -> storage_info:
+        pass
+
     @abc.abstractmethod
     def list(self, path):
         pass
