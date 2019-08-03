@@ -6,7 +6,7 @@ from cima.goes import ProductBand
 from netCDF4 import Dataset
 
 
-class GoesData(metaclass=abc.ABCMeta, Storage):
+class GoesData(Storage):
     @abc.abstractmethod
     def grouped_one_hour_blobs(self, year: int, day_of_year: int, hour: int, bands: List[ProductBand]) -> List[GroupedBandBlobs]:
         pass
