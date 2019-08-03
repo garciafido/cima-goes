@@ -17,7 +17,7 @@ from cima.goes.storage._goes_data import GoesStorage
 GOES_PUBLIC_BUCKET = 'gcp-public-data-goes-16'
 
 
-class GCS(Storage, GoesStorage):
+class GCS(GoesStorage):
     '''
     Google Cloud Storage
     '''
