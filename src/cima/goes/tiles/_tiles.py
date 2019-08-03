@@ -5,7 +5,7 @@ import pyproj
 from typing import Dict, List, Tuple
 from dataclasses import dataclass, asdict
 from cima.goes import Band, Product, ProductBand
-from cima.goes import GoesData
+from cima.goes import GoesStorage
 from cima.goes.storage._blobs import BandBlobs
 from cima.goes.tasks import Task, run_concurrent
 from cima.goes.storage._file_systems import storage_info
@@ -58,7 +58,7 @@ class BandTiles:
 BandTilesDict = Dict[Tuple[Product, Band], Dict[str, Tile]]
 
 
-def generate_tiles(goes_storage: GoesData,
+def generate_tiles(goes_storage: GoesStorage,
                    bands: List[ProductBand],
                    lat_south: float,
                    lat_north: float,
@@ -95,7 +95,7 @@ def generate_tiles(goes_storage: GoesData,
 
 
 def _get_indexed_tiles(goes_info: storage_info, band: ProductBand, **kwargs) -> BandTiles:
-    goesdata: GoesData = mount_goes_storage(goes_info)
+    goesdata: GoesStorage = mount_goes_storage(goes_info)
     band_blobs: BandBlobs = goesdata.one_hour_blobs(2018, 360, 12, band)
     dataset = goesdata.get_dataset(band_blobs.blobs[0])
     try:

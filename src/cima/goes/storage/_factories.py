@@ -1,4 +1,4 @@
-from cima.goes import GoesData
+from cima.goes import GoesStorage
 from cima.goes.storage._ftp import FTP
 from cima.goes.storage._async_ftp import AFTP
 from cima.goes.storage._nfs import NFS
@@ -18,7 +18,7 @@ def mount_storage(store: storage_info) -> Storage:
     raise Exception(f'{store.stype.value} not implemented')
 
 
-def mount_goes_storage(store: storage_info) -> GoesData:
+def mount_goes_storage(store: storage_info) -> GoesStorage:
     if store.stype == storage_type.GCS:
         return GCS(**store.kwargs)
     raise Exception(f'{store.stype.value} not implemented')

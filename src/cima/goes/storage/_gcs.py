@@ -10,14 +10,14 @@ from cima.goes import file_pattern, path_prefix, slice_obs_start, Product, mode
 from cima.goes import Band
 from cima.goes.storage._file_systems import Storage, storage_type, storage_info
 from cima.goes.storage._blobs import GoesBlob, GroupedBandBlobs, BandBlobs
-from cima.goes.storage._goes_data import GoesData
+from cima.goes.storage._goes_data import GoesStorage
 
 
 # Browse: https://console.cloud.google.com/storage/browser/gcp-public-data-goes-16
 GOES_PUBLIC_BUCKET = 'gcp-public-data-goes-16'
 
 
-class GCS(Storage, GoesData):
+class GCS(Storage, GoesStorage):
     '''
     Google Cloud Storage
     '''
@@ -60,7 +60,7 @@ class GCS(Storage, GoesData):
         raise Exception('Not implemented: upload_stream')
 
     #
-    # GoesData methods
+    # GoesStorage methods
     #
     def get_dataset(self, blob: GoesBlob) -> netCDF4.Dataset:
         data = self.download_from_blob(blob)
