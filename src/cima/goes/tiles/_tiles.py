@@ -88,10 +88,19 @@ def generate_tiles(goes_storage: GoesStorage,
     try:
         lats, lons = get_lats_lons(dataset)
         major_order = FORTRAN_ORDER
-        for index, tile in tiles.items():
-            tasks.append(Task(_find_indexes, tile, lats, lons, major_order))
-        workers = min(workers, len(tasks))
-        responses: List[Tile] = run_concurrent(tasks, workers=workers)
+        responses: List[Tile] = []
+        if workers > 1:
+            for index, tile in tiles.items():
+                tasks.append(Task(_find_indexes, tile, lats, lons, major_order))
+            workers = min(workers, len(tasks))
+            responses: List[Tile] = run_concurrent(tasks, workers=workers)
+        else:
+            for index, tile in tiles.items():
+                try:
+                    responses.append(_find_indexes(tile, lats, lons, major_order))
+                except Exception as e:
+                    responses.append(e)
+
         errors = []
         new_tiles = {}
         for tile in responses:
