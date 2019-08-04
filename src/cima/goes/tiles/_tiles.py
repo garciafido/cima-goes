@@ -89,7 +89,7 @@ def generate_tiles(goes_storage: GoesStorage,
         lats, lons = get_lats_lons(dataset)
         major_order = FORTRAN_ORDER
         for index, tile in tiles.items():
-            tasks.append(Task(_find_indexes, index, tile, lats, lons, major_order))
+            tasks.append(Task(_find_indexes, tile, lats, lons, major_order))
         workers = min(workers, len(tasks))
         responses: List[Tile] = run_concurrent(tasks, workers=workers)
         errors = []
