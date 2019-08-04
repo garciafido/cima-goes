@@ -54,7 +54,7 @@ def get_tile_extent(tile, trim_excess=0) -> tuple:
 class BandTiles:
     product: Product
     band: Band
-    tiles: List[Tile]
+    tiles: Dict[str, Tile]
 
 
 BandTilesDict = Dict[Tuple[Product, Band], Dict[str, Tile]]
@@ -74,7 +74,7 @@ def generate_tiles(goes_storage: GoesStorage,
                    ) -> BandTiles:
     tasks = []
     band_blobs: BandBlobs = goes_storage.one_hour_blobs(2018, 360, 12, product_band)
-    tiles = _get_tiles_one_band(
+    tiles = _get_region_tiles(
         lat_south=lat_south,
         lat_north=lat_north,
         lon_west=lon_west,
@@ -93,12 +93,12 @@ def generate_tiles(goes_storage: GoesStorage,
         workers = min(workers, len(tasks))
         responses: List[Tile] = run_concurrent(tasks, workers=workers)
         errors = []
-        new_tiles = []
-        for resp in responses:
-            if not isinstance(resp, Tile):
-                errors.append(resp)
+        new_tiles = {}
+        for tile in responses:
+            if not isinstance(tile, Tile):
+                errors.append(tile)
             else:
-                new_tiles.append(resp)
+                new_tiles[tile.id] = tile
         band_tiles = BandTiles(product_band.product, product_band.band, new_tiles)
         if errors:
             raise Exception(str(errors))
@@ -107,14 +107,14 @@ def generate_tiles(goes_storage: GoesStorage,
         dataset.close()
 
 
-def _get_tiles_one_band(lat_south: float, lat_north: float,
-                        lon_west: float, lon_east: float,
-                        lat_step: float, lon_step: float,
-                        lat_overlap: float, lon_overlap: float):
+def _get_region_tiles(lat_south: float, lat_north: float,
+                      lon_west: float, lon_east: float,
+                      lat_step: float, lon_step: float,
+                      lat_overlap: float, lon_overlap: float):
     """
-    >>> _get_tiles_one_band(lat_south=-45, lat_north=-40, lon_west=-75, lon_east=-70, lat_step=5, lon_step=5, lon_overlap=1, lat_overlap=1)
+    >>> _get_region_tiles(lat_south=-45, lat_north=-40, lon_west=-75, lon_east=-70, lat_step=5, lon_step=5, lon_overlap=1, lat_overlap=1)
     {'0': Tile(lat_south=-46.0, lat_north=-39.0, lon_west=-76.0, lon_east=-69.0, x_min=None, x_max=None, y_min=None, y_max=None)}
-    >>> _get_tiles_one_band(lat_south=-43, lat_north=-33, lon_west=-75, lon_east=-70, lat_step=10, lon_step=2.5, lon_overlap=1, lat_overlap=1)
+    >>> _get_region_tiles(lat_south=-43, lat_north=-33, lon_west=-75, lon_east=-70, lat_step=10, lon_step=2.5, lon_overlap=1, lat_overlap=1)
     {'0': Tile(lat_south=-44.0, lat_north=-32.0, lon_west=-76.0, lon_east=-71.5, x_min=None, x_max=None, y_min=None, y_max=None), '1': Tile(lat_south=-44.0, lat_north=-32.0, lon_west=-73.5, lon_east=-69.0, x_min=None, x_max=None, y_min=None, y_max=None)}
     """
     tiles = {}
