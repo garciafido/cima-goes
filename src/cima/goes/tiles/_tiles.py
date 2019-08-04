@@ -37,6 +37,8 @@ class Tile:
     y_min: int = None
     y_max: int = None
 
+    id: str = None
+
 
 def get_tile_extent(tile, trim_excess=0) -> tuple:
     # (left, right, bottom, top)
@@ -52,14 +54,14 @@ def get_tile_extent(tile, trim_excess=0) -> tuple:
 class BandTiles:
     product: Product
     band: Band
-    tiles: Dict[str, Tile]
+    tiles: List[Tile]
 
 
 BandTilesDict = Dict[Tuple[Product, Band], Dict[str, Tile]]
 
 
 def generate_tiles(goes_storage: GoesStorage,
-                   bands: List[ProductBand],
+                   product_band: ProductBand,
                    lat_south: float,
                    lat_north: float,
                    lon_west: float,
@@ -69,41 +71,65 @@ def generate_tiles(goes_storage: GoesStorage,
                    lon_overlap: float = 0,
                    lat_overlap: float = 0,
                    workers = 2,
-                   ) -> BandTilesDict:
+                   ) -> BandTiles:
     tasks = []
-    for band in bands:
-        tasks.append(
-            Task(_get_indexed_tiles,
-                 goes_storage.get_storage_info(),
-                 band,
-                 lat_south=lat_south, lat_north=lat_north,
-                 lon_west=lon_west, lon_east=lon_east,
-                 lat_step=lat_step, lon_step=lon_step,
-                 lat_overlap=lat_overlap, lon_overlap=lon_overlap
-            ))
-    workers = min(workers, len(tasks))
-    responses: List[BandTiles] = run_concurrent(tasks, workers=workers)
-    errors = []
-    for resp in responses:
-        if not isinstance(resp, BandTiles):
-            errors.append(resp)
-    if errors:
-        raise Exception(str(errors))
-
-    band_tiles_dict = {(band_tiles.product, band_tiles.band): band_tiles.tiles for band_tiles in responses}
-    return band_tiles_dict
-
-
-def _get_indexed_tiles(goes_info: storage_info, band: ProductBand, **kwargs) -> BandTiles:
-    goesdata: GoesStorage = mount_goes_storage(goes_info)
-    band_blobs: BandBlobs = goesdata.one_hour_blobs(2018, 360, 12, band)
-    dataset = goesdata.get_dataset(band_blobs.blobs[0])
+    band_blobs: BandBlobs = goes_storage.one_hour_blobs(2018, 360, 12, product_band)
+    tiles = _get_tiles_one_band(
+        lat_south=lat_south,
+        lat_north=lat_north,
+        lon_west=lon_west,
+        lon_east=lon_east,
+        lat_step=lat_step,
+        lon_step=lon_step,
+        lon_overlap=lon_overlap,
+        lat_overlap=lat_overlap,
+    )
+    dataset = goes_storage.get_dataset(band_blobs.blobs[0])
     try:
-        tiles = _get_tiles_one_band(**kwargs)
-        tiles = _add_indexes_for_dataset(dataset, tiles)
-        return BandTiles(band.product, band.band, tiles)
+        lats, lons = get_lats_lons(dataset)
+        major_order = FORTRAN_ORDER
+        for index, tile in tiles.items():
+            tasks.append(Task(_find_indexes, index, tile, lats, lons, major_order))
+        workers = min(workers, len(tasks))
+        responses: List[Tile] = run_concurrent(tasks, workers=workers)
+        errors = []
+        new_tiles = []
+        for resp in responses:
+            if not isinstance(resp, Tile):
+                errors.append(resp)
+            else:
+                new_tiles.append(resp)
+        band_tiles = BandTiles(product_band.product, product_band.band, new_tiles)
+        if errors:
+            raise Exception(str(errors))
+        return band_tiles
     finally:
         dataset.close()
+
+
+def _get_tiles_one_band(lat_south: float, lat_north: float,
+                        lon_west: float, lon_east: float,
+                        lat_step: float, lon_step: float,
+                        lat_overlap: float, lon_overlap: float):
+    """
+    >>> _get_tiles_one_band(lat_south=-45, lat_north=-40, lon_west=-75, lon_east=-70, lat_step=5, lon_step=5, lon_overlap=1, lat_overlap=1)
+    {'0': Tile(lat_south=-46.0, lat_north=-39.0, lon_west=-76.0, lon_east=-69.0, x_min=None, x_max=None, y_min=None, y_max=None)}
+    >>> _get_tiles_one_band(lat_south=-43, lat_north=-33, lon_west=-75, lon_east=-70, lat_step=10, lon_step=2.5, lon_overlap=1, lat_overlap=1)
+    {'0': Tile(lat_south=-44.0, lat_north=-32.0, lon_west=-76.0, lon_east=-71.5, x_min=None, x_max=None, y_min=None, y_max=None), '1': Tile(lat_south=-44.0, lat_north=-32.0, lon_west=-73.5, lon_east=-69.0, x_min=None, x_max=None, y_min=None, y_max=None)}
+    """
+    tiles = {}
+    lats = [x for x in cp.arange(lat_south, lat_north, lat_step)]
+    lons = [x for x in cp.arange(lon_west, lon_east, lon_step)]
+    tiles_coordinates = [(lat, lat + lat_step, lon, lon + lon_step, ) for lat in lats for lon in lons]
+    for index, lats_lons in enumerate(tiles_coordinates):
+        tiles[str(index)] = Tile(
+            lat_south = float(lats_lons[0] - lat_overlap),
+            lat_north = float(lats_lons[1] + lat_overlap),
+            lon_west = float(lats_lons[2] - lon_overlap),
+            lon_east = float(lats_lons[3] + lon_overlap),
+            id=str(index)
+        )
+    return tiles
 
 
 def save_tiles(storage: Storage, filepath: str, band_tiles_dict: BandTilesDict):
@@ -155,36 +181,6 @@ def get_lats_lons(dataset, tile: Tile = None):
     return cp.array(lats), cp.array(lons)
 
 
-def _get_tiles_one_band(lat_south: float, lat_north: float,
-                        lon_west: float, lon_east: float,
-                        lat_step: float, lon_step: float,
-                        lat_overlap: float, lon_overlap: float):
-    """
-    >>> _get_tiles_one_band(lat_south=-45, lat_north=-40, lon_west=-75, lon_east=-70, lat_step=5, lon_step=5, lon_overlap=1, lat_overlap=1)
-    {'0': Tile(lat_south=-46.0, lat_north=-39.0, lon_west=-76.0, lon_east=-69.0, x_min=None, x_max=None, y_min=None, y_max=None)}
-    >>> _get_tiles_one_band(lat_south=-43, lat_north=-33, lon_west=-75, lon_east=-70, lat_step=10, lon_step=2.5, lon_overlap=1, lat_overlap=1)
-    {'0': Tile(lat_south=-44.0, lat_north=-32.0, lon_west=-76.0, lon_east=-71.5, x_min=None, x_max=None, y_min=None, y_max=None), '1': Tile(lat_south=-44.0, lat_north=-32.0, lon_west=-73.5, lon_east=-69.0, x_min=None, x_max=None, y_min=None, y_max=None)}
-    """
-    tiles = {}
-    lats = [x for x in cp.arange(lat_south, lat_north, lat_step)]
-    lons = [x for x in cp.arange(lon_west, lon_east, lon_step)]
-    tiles_coordinates = [(lat, lat + lat_step, lon, lon + lon_step, ) for lat in lats for lon in lons]
-    for index, lats_lons in enumerate(tiles_coordinates):
-        tiles[str(index)] = Tile(
-            lat_south = float(lats_lons[0] - lat_overlap),
-            lat_north = float(lats_lons[1] + lat_overlap),
-            lon_west = float(lats_lons[2] - lon_overlap),
-            lon_east = float(lats_lons[3] + lon_overlap))
-    return tiles
-
-
-def _add_indexes_for_dataset(dataset, tiles):
-    major_order = FORTRAN_ORDER
-    lats, lons = get_lats_lons(dataset)
-    _add_indexes(tiles, lats, lons, major_order)
-    return tiles
-
-
 def _nearest_indexes(lat, lon, lats, lons, major_order):
     distance = (lat - lats) * (lat - lats) + (lon - lons) * (lon - lons)
     return cp.unravel_index(cp.argmin(distance), lats.shape, major_order)
@@ -200,8 +196,4 @@ def _find_indexes(tile: Tile, lats, lons, major_order):
     tile.x_max = int(max(x1, x2, x3, x4))
     tile.y_min = int(min(y1, y2, y3, y4))
     tile.y_max = int(max(y1, y2, y3, y4))
-
-
-def _add_indexes(tiles, lats, lons, order):
-    for index, tile in tiles.items():
-        _find_indexes(tile, lats, lons, order)
+    return tile
