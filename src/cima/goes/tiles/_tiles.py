@@ -90,7 +90,7 @@ def generate_tiles(goes_storage: GoesStorage,
                    tiles_dict: Dict[str, Tile],
                    workers: int = 1) -> BandTiles:
     band_blobs: BandBlobs = goes_storage.one_hour_blobs(2018, 360, 12, product_band)
-    dataset = goes_storage.get_dataset_from_blob(band_blobs.blobs[0])
+    dataset = goes_storage.get_dataset(band_blobs.blobs[0])
     try:
         lats, lons = get_lats_lons(dataset)
         major_order = FORTRAN_ORDER
