@@ -37,7 +37,7 @@ def compose_RGB(dataset_R, dataset_G, dataset_B, tile_R: Tile, tile_G: Tile, til
 
     RGB = cp.dstack([R, G_true, B_resized])
 
-    return RGB, R, G_true, B
+    return RGB, R, G_true, B_resized
 
 
 def get_data(dataset, tile: Tile):
