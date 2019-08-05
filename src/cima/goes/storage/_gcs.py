@@ -133,7 +133,7 @@ class GCS(GoesStorage):
         blobs = self.one_hour_blobs(year, day_of_year, hour, bands)
         Datasets = namedtuple('Datasets', ['start'] + [band.name for band in bands])
         for blob in blobs:
-            data = {band.name: self.get_dataset(getattr(blob, band.name)) for band in bands}
+            data = {band.name: self.get_dataset_from_blob(getattr(blob, band.name)) for band in bands}
             yield Datasets(start=blob.start, **data)
 
     def close_dataset(self, dataset):

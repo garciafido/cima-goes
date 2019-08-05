@@ -60,7 +60,7 @@ class BandTiles:
 BandTilesDict = Dict[Tuple[Product, Band], Dict[str, Tile]]
 
 
-def generate_tiles(goes_storage: GoesStorage,
+def generate_region_tiles(goes_storage: GoesStorage,
                    product_band: ProductBand,
                    lat_south: float,
                    lat_north: float,
@@ -70,11 +70,9 @@ def generate_tiles(goes_storage: GoesStorage,
                    lon_step: float,
                    lon_overlap: float = 0,
                    lat_overlap: float = 0,
-                   workers = 2,
+                   workers:int = 1,
                    ) -> BandTiles:
-    tasks = []
-    band_blobs: BandBlobs = goes_storage.one_hour_blobs(2018, 360, 12, product_band)
-    tiles = _get_region_tiles(
+    region_tiles = _get_region_tiles(
         lat_south=lat_south,
         lat_north=lat_north,
         lon_west=lon_west,
@@ -84,26 +82,35 @@ def generate_tiles(goes_storage: GoesStorage,
         lon_overlap=lon_overlap,
         lat_overlap=lat_overlap,
     )
-    dataset = goes_storage.get_dataset(band_blobs.blobs[0])
+    return generate_tiles(goes_storage, product_band, region_tiles, workers)
+
+
+def generate_tiles(goes_storage: GoesStorage,
+                   product_band: ProductBand,
+                   tiles_dict: Dict[str, Tile],
+                   workers: int = 1) -> BandTiles:
+    band_blobs: BandBlobs = goes_storage.one_hour_blobs(2018, 360, 12, product_band)
+    dataset = goes_storage.get_dataset_from_blob(band_blobs.blobs[0])
     try:
         lats, lons = get_lats_lons(dataset)
         major_order = FORTRAN_ORDER
-        responses: List[Tile] = []
+        tiles: List[Tile] = []
         if workers > 1:
-            for index, tile in tiles.items():
+            tasks = []
+            for index, tile in tiles_dict.items():
                 tasks.append(Task(_find_indexes, tile, lats, lons, major_order))
             workers = min(workers, len(tasks))
-            responses: List[Tile] = run_concurrent(tasks, workers=workers)
+            tiles = run_concurrent(tasks, workers=workers)
         else:
-            for index, tile in tiles.items():
+            for index, tile in tiles_dict.items():
                 try:
-                    responses.append(_find_indexes(tile, lats, lons, major_order))
+                    tiles.append(_find_indexes(tile, lats, lons, major_order))
                 except Exception as e:
-                    responses.append(e)
+                    tiles.append(e)
 
         errors = []
         new_tiles = {}
-        for tile in responses:
+        for tile in tiles:
             if not isinstance(tile, Tile):
                 errors.append(tile)
             else:
