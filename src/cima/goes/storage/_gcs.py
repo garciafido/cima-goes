@@ -6,8 +6,8 @@ from typing import List, Dict, Tuple
 import google.cloud.storage as gcs
 from cima.goes.utils._file_names import ProductBand
 from google.oauth2 import service_account
-from cima.goes import file_pattern, path_prefix, slice_obs_start, Product, mode
-from cima.goes import Band
+from cima.goes import file_pattern, path_prefix, slice_obs_start, Product
+from cima.goes import Band, ANY_MODE
 from cima.goes.storage._file_systems import Storage, storage_type, storage_info
 from cima.goes.storage._blobs import GoesBlob, GroupedBandBlobs, BandBlobs
 from cima.goes.storage._goes_data import GoesStorage
@@ -23,7 +23,7 @@ class GCS(GoesStorage):
     '''
     def __init__(self, credentials_as_dict: dict=None,
                  bucket: str=GOES_PUBLIC_BUCKET,
-                 product: Product=Product.CMIPF, mode: mode=mode.M3,
+                 product: Product=Product.CMIPF, mode: str = ANY_MODE,
                  credentials_filepath: str=None):
         self.credentials_as_dict = credentials_as_dict
         self.credentials_filepath = credentials_filepath
