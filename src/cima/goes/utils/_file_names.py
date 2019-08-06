@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
+import re
+
 
 # File neme pattern:
 # OR_ABI-L2–CMIPF–M3C09_G16_sYYYYJJJHHMMSSs_eYYYYJJJHHMMSSs_cYYYYJJJHHMMSSs.nc
@@ -67,19 +69,23 @@ class ProductBand:
 
 OR = 'OR' # Operational System Real-Time Data
 G16 = 'G16' # GOES-16
-ANY_MODE = 'M?'
+ANY_MODE = 'M.'
 
 
 def path_prefix(year, day_of_year, hour, product=Product.CMIPF):
     return f'{product.value}/{year:04d}/{day_of_year:03d}/{hour:02d}/'
 
 
-def file_pattern(band, product=Product.CMIPF, mode=ANY_MODE):
-    return f'{OR}_{product.value}-{mode}C{band:02d}_{G16}'
+def file_name(band: Band, product=Product.CMIPF, mode=ANY_MODE):
+    return f'{OR}_{product.value}-{mode}C{band.value:02d}_{G16}'
+
+
+def file_regex_pattern(band: Band, product: Product = Product.CMIPF, mode: str = ANY_MODE):
+    return re.compile(file_name(band, product, mode))
 
 
 def slice_obs_start(product=Product.CMIPF):
     prefix_pos = len(path_prefix(year=1111, day_of_year=11, hour=11, product=product)) + len(
-        file_pattern(band=2, product=product)) + 2
+        file_name(band=Band.RED, product=product)) + 2
     return slice(prefix_pos, prefix_pos + len('20183650045364'))
 

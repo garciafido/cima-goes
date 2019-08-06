@@ -1,4 +1,4 @@
-from cima.goes import GoesStorage
+from cima.goes.storage._goes_data import GoesStorage
 from cima.goes.storage._ftp import FTP
 from cima.goes.storage._async_ftp import AFTP
 from cima.goes.storage._nfs import NFS

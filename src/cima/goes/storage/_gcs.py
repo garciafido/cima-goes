@@ -7,7 +7,7 @@ from typing import List, Dict, Tuple
 import google.cloud.storage as gcs
 from cima.goes.utils._file_names import ProductBand
 from google.oauth2 import service_account
-from cima.goes import file_pattern, path_prefix, slice_obs_start, Product
+from cima.goes import file_regex_pattern, path_prefix, slice_obs_start, Product
 from cima.goes import Band, ANY_MODE
 from cima.goes.storage._file_systems import Storage, storage_type, storage_info
 from cima.goes.storage._blobs import GoesBlob, GroupedBandBlobs, BandBlobs
@@ -105,7 +105,7 @@ class GCS(GoesStorage):
     def band_blobs(self, year: int, day_of_year: int, hour: int, product_band: ProductBand) -> List[GoesBlob]:
       return self._list_blobs(
           path_prefix(year=year, day_of_year=day_of_year, hour=hour, product=product_band.product),
-          [file_pattern(band=product_band.band.value, product=product_band.product, mode=self.mode)]
+          [file_regex_pattern(band=product_band.band, product=product_band.product, mode=self.mode)]
       )
 
     def group_blobs(self, band_blobs_list: List[BandBlobs]) -> List[GroupedBandBlobs]:
@@ -159,11 +159,9 @@ class GCS(GoesStorage):
                 result.append(blob)
         else:
             for blob in blobs:
-                match = True
                 for pattern in gcs_patterns:
-                    if fnmatch.fnmatch(blob.name, pattern):
-                        match = False
-                if match:
-                    result.append(blob)
+                    if pattern.search(blob.name):
+                        result.append(blob)
+                        break
         return result
 
