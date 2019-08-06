@@ -5,12 +5,11 @@ import pyproj
 from typing import Dict, List, Tuple
 from dataclasses import dataclass, asdict
 from cima.goes import Band, Product, ProductBand
-from cima.goes import GoesStorage
+from cima.goes.storage import GoesStorage
 from cima.goes.storage._blobs import BandBlobs
 from cima.goes.tasks import Task, run_concurrent
-from cima.goes.storage._file_systems import storage_info
 from cima.goes.storage._file_systems import Storage
-from cima.goes.storage._factories import mount_goes_storage
+
 
 try:
     import numpy as np
