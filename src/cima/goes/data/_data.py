@@ -40,8 +40,8 @@ def compose_RGB(dataset_R, dataset_G, dataset_B, tile_R: Tile, tile_G: Tile, til
     return RGB, R, G_true, B_resized
 
 
-def get_data(dataset, tile: Tile):
-    return dataset.variables['CMI'][tile.y_min : tile.y_max, tile.x_min : tile.x_max]
+def get_data(dataset, tile: Tile, variable: str = 'CMI'):
+    return dataset.variables[variable][tile.y_min : tile.y_max, tile.x_min : tile.x_max]
 
 
 def _resize(image, new_size):

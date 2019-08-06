@@ -1,8 +1,16 @@
+import io
 import os
+from dataclasses import dataclass
+
+import numpy as np
 import cartopy
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
+from cima.goes.storage._file_systems import Storage
+from cima.goes.tiles import Tile, get_tile_extent
 from cima.goes.utils.load_cpt import load_cpt
+from matplotlib.axes import Axes
+
 
 LOCAL_BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -26,7 +34,7 @@ def add_cultural(ax):
     ax.add_feature(states_provinces, edgecolor='white', linewidth=linewidth)
 
 
-def add_grid(ax, lonlat_region):
+def add_grid(ax):
     linewidth = 1.25
     gl = ax.gridlines(linewidth=linewidth,
                       linestyle='dotted',
@@ -42,36 +50,63 @@ def get_cloud_tops_palette():
     return LinearSegmentedColormap('cpt', cpt)
 
 
-def trim_excess(lonlat_region):
-    latsouth = lonlat_region[2]
-    latnorth = lonlat_region[3]
-    lonwest = lonlat_region[0]
-    loneast = lonlat_region[1]
-    return [lonwest+0.5, loneast-0.5, latsouth+0.5, latnorth-0.5]
+def pcolormesh(ax: Axes, image, lons, lats, cmap='gray', vmin=0, vmax=1):
+    if len(image.shape) == 3:
+        mesh_rgb = image[:, :-1, :]
+        colorTuple = mesh_rgb.reshape((mesh_rgb.shape[0] * mesh_rgb.shape[1]), 3)
+        # ADDED THIS LINE
+        colorTuple = np.insert(colorTuple, 3, 1.0, axis=1)
+        # What you put in for the image doesn't matter because of the color mapping
+        ax.pcolormesh(lons, lats, image[:, :, 0], color=colorTuple)
+    else:
+        ax.pcolormesh(lons, lats, image, cmap=cmap, vmin=vmin, vmax=vmax)
 
 
-def save_image(image, filepath, tile, lats, lons, cmap='gray', vmin=0, vmax=0.7, cultural=False, extent=None):
-    dirpath = os.path.dirname(os.path.abspath(filepath))
-    if not os.path.exists(dirpath):
-        os.makedirs(dirpath, exist_ok=True)
+def set_extent(ax: Axes, tile: Tile, trim_excess=0):
+    extent = get_tile_extent(tile, trim_excess=trim_excess)
+    ax.set_extent(extent, crs=ccrs.PlateCarree())
+
+
+@dataclass
+class ImageResolution:
+    dpi: int
+    x: int
+    y: int
+
+
+def get_image_inches(image):
     dummy_dpi = 100
     x, y = image.shape
+    return ImageResolution(dummy_dpi, x / dummy_dpi, y / dummy_dpi)
+
+
+def save_image(image,
+               storage: Storage,
+               filepath: str,
+               tile: Tile,
+               lats, lons,
+               cmap='gray', vmin=0, vmax=1,
+               draw_cultural=False, draw_grid=False,
+               trim_excess=0):
+    image_inches = get_image_inches(image)
+
     fig = plt.figure(frameon=False)
     try:
-        fig.set_size_inches(x / dummy_dpi, y / dummy_dpi)
+        fig.set_size_inches(image_inches.x, image_inches.y)
 
         ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
         ax.set_axis_off()
-        if extent is not None:
-            ax.set_extent(extent, crs=ccrs.PlateCarree())
-        if cultural:
+        set_extent(ax, tile, trim_excess)
+        if draw_cultural:
             add_cultural(ax)
-            add_grid(ax, extent)
-        ax.pcolormesh(lons, lats, image, cmap=cmap, vmin=vmin, vmax=vmax)
-
+        if draw_grid:
+            add_grid(ax)
+        pcolormesh(ax, lons, lats, image, cmap=cmap, vmin=vmin, vmax=vmax)
         fig.add_axes(ax, projection=ccrs.PlateCarree())
         ax.axis('off')
-        plt.savefig(filepath + '.png', dpi=dummy_dpi, bbox_inches='tight', pad_inches=0)
+        buffer = io.BytesIO()
+        plt.savefig(buffer, dpi=image_inches.dpi, bbox_inches='tight', pad_inches=0)
+        storage.upload_stream(buffer, filepath + '.png')
     finally:
         fig.clear()
         plt.close()
