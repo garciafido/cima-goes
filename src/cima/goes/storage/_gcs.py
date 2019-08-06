@@ -1,13 +1,12 @@
 import os
 import io
 import netCDF4
-import fnmatch
 from collections import namedtuple
 from typing import List, Dict, Tuple
 import google.cloud.storage as gcs
 from cima.goes.utils._file_names import ProductBand
 from google.oauth2 import service_account
-from cima.goes import file_regex_pattern, path_prefix, slice_obs_start, Product
+from cima.goes.utils._file_names import file_regex_pattern, path_prefix, slice_obs_start, Product
 from cima.goes import Band, ANY_MODE
 from cima.goes.storage._file_systems import Storage, storage_type, storage_info
 from cima.goes.storage._blobs import GoesBlob, GroupedBandBlobs, BandBlobs
