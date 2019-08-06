@@ -65,21 +65,17 @@ class ProductBand:
     band: Band
 
 
-class mode(Enum):
-    M3 = 'M3'
-    M4 = 'M4'
-
-
 OR = 'OR' # Operational System Real-Time Data
 G16 = 'G16' # GOES-16
+ANY_MODE = 'M*'
 
 
 def path_prefix(year, day_of_year, hour, product=Product.CMIPF):
     return f'{product.value}/{year:04d}/{day_of_year:03d}/{hour:02d}/'
 
 
-def file_pattern(band, product=Product.CMIPF, mode=mode.M3):
-    return f'{OR}_{product.value}-{mode.value}C{band:02d}_{G16}'
+def file_pattern(band, product=Product.CMIPF, mode=ANY_MODE):
+    return f'{OR}_{product.value}-{mode}C{band:02d}_{G16}'
 
 
 def slice_obs_start(product=Product.CMIPF):

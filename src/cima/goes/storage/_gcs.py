@@ -133,7 +133,7 @@ class GCS(GoesStorage):
         blobs = self.one_hour_blobs(year, day_of_year, hour, bands)
         Datasets = namedtuple('Datasets', ['start'] + [band.name for band in bands])
         for blob in blobs:
-            data = {band.name: self.get_dataset_from_blob(getattr(blob, band.name)) for band in bands}
+            data = {band.name: self.get_dataset(getattr(blob, band.name)) for band in bands}
             yield Datasets(start=blob.start, **data)
 
     def close_dataset(self, dataset):
@@ -153,7 +153,7 @@ class GCS(GoesStorage):
     def _list_blobs(self, path: str, gcs_patterns) -> List[GoesBlob]:
         blobs = self.list_blobs(path)
         result = []
-        if gcs_patterns == None or len(gcs_patterns) == 0:
+        if gcs_patterns is None or len(gcs_patterns) == 0:
             for b in blobs:
                 result.append(b)
         else:

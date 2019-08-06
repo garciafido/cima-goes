@@ -35,7 +35,7 @@ def compose_RGB(dataset_R, dataset_G, dataset_B, tile_R: Tile, tile_G: Tile, til
     G_true = 0.48358168 * R + 0.45706946 * B_resized + 0.06038137 * G_resized
     G_true = cp.clip(G_true, 0, 1)
 
-    RGB = cp.dstack([R, G_true, B_resized])
+    RGB = cp.clip(cp.dstack([R, G_true, B_resized]), 0, 1)
 
     return RGB, R, G_true, B_resized
 
