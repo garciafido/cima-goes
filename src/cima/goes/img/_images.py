@@ -76,7 +76,7 @@ class ImageResolution:
 
 def get_image_inches(image):
     dummy_dpi = 100
-    x, y = image.shape
+    x, y = image.shape[:2]
     return ImageResolution(dummy_dpi, x / dummy_dpi, y / dummy_dpi)
 
 
