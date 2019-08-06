@@ -67,7 +67,7 @@ class ProductBand:
 
 OR = 'OR' # Operational System Real-Time Data
 G16 = 'G16' # GOES-16
-ANY_MODE = 'M*'
+ANY_MODE = 'M?'
 
 
 def path_prefix(year, day_of_year, hour, product=Product.CMIPF):
