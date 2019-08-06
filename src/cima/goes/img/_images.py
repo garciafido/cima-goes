@@ -113,7 +113,7 @@ def save_image(image,
         plt.savefig(buffer, format=format, dpi=image_inches.dpi, bbox_inches='tight', pad_inches=0)
         buffer.seek(0)
         storage.upload_stream(buffer, filepath)
-        
+        return buffer
     finally:
         fig.clear()
         plt.close()
