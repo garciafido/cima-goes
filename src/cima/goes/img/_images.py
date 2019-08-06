@@ -104,6 +104,7 @@ def save_image(image,
         pcolormesh(ax, lons, lats, image, cmap=cmap, vmin=vmin, vmax=vmax)
         fig.add_axes(ax, projection=ccrs.PlateCarree())
         ax.axis('off')
+        
         buffer = io.BytesIO()
         _, file_extension = os.path.splitext(filepath)
         format = 'png'
@@ -111,7 +112,8 @@ def save_image(image,
             format = file_extension[1:]
         plt.savefig(buffer, format=format, dpi=image_inches.dpi, bbox_inches='tight', pad_inches=0)
         buffer.seek(0)
-        storage.upload_stream(plt.imread(buffer), filepath)
+        storage.upload_stream(buffer, filepath)
+        
     finally:
         fig.clear()
         plt.close()
