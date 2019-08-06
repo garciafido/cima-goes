@@ -92,18 +92,20 @@ def save_image(image,
                draw_cultural=False, draw_grid=False,
                trim_excess=0):
     image_inches = get_image_inches(image)
-
     fig = plt.figure(frameon=False)
     try:
+        print('va size')
         fig.set_size_inches(image_inches.x, image_inches.y)
-
+        print('va AX')
         ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
         ax.set_axis_off()
+        print('va extent')
         set_extent(ax, tile, trim_excess)
         if draw_cultural:
             add_cultural(ax)
         if draw_grid:
             add_grid(ax)
+        print('va colormesh')
         pcolormesh(ax, lons, lats, image, cmap=cmap, vmin=vmin, vmax=vmax)
         fig.add_axes(ax, projection=ccrs.PlateCarree())
         ax.axis('off')
