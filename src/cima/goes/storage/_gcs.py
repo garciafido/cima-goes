@@ -1,6 +1,7 @@
 import os
 import io
 import netCDF4
+import fnmatch
 from collections import namedtuple
 from typing import List, Dict, Tuple
 import google.cloud.storage as gcs
@@ -154,15 +155,15 @@ class GCS(GoesStorage):
         blobs = self.list_blobs(path)
         result = []
         if gcs_patterns is None or len(gcs_patterns) == 0:
-            for b in blobs:
-                result.append(b)
+            for blob in blobs:
+                result.append(blob)
         else:
-            for b in blobs:
+            for blob in blobs:
                 match = True
                 for pattern in gcs_patterns:
-                    if not pattern in b.path:
+                    if fnmatch.fnmatch(blob.name, pattern):
                         match = False
                 if match:
-                    result.append(b)
+                    result.append(blob)
         return result
 
