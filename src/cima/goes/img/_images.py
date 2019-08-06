@@ -51,6 +51,7 @@ def get_cloud_tops_palette():
 
 
 def pcolormesh(ax: Axes, image, lons, lats, cmap=None, vmin=None, vmax=None):
+    print('shape', image.shape)
     if len(image.shape) == 3:
         print('ENTRA')
         mesh_rgb = image[:, :-1, :]
@@ -94,12 +95,9 @@ def save_image(image,
     image_inches = get_image_inches(image)
     fig = plt.figure(frameon=False)
     try:
-        print('va size')
         fig.set_size_inches(image_inches.x, image_inches.y)
-        print('va AX')
         ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
         ax.set_axis_off()
-        print('va extent')
         set_extent(ax, tile, trim_excess)
         if draw_cultural:
             add_cultural(ax)
