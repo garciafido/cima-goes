@@ -50,40 +50,32 @@ def get_cloud_tops_palette():
     return LinearSegmentedColormap('cpt', cpt)
 
 
-def make_color_tuple(RGB):
+def make_color_tuple(rgb):
     """
     Convert an 3D RGB array into an color tuple list suitable for plotting with
     pcolormesh.
     Input:
-        RGB - a three dimensional array of RGB values from np.dstack([R, G, B])
+        rgb - a three dimensional array of RGB values from np.dstack([R, G, B])
     """
     # Don't use the last column of the RGB array or else the image will be scrambled!
     # This is the strange nature of pcolormesh.
-    rgb = RGB[:, :-1, :]
+    rgb = rgb[:, :-1, :]
 
     # Flatten the array, because that's what pcolormesh wants.
-    colorTuple = rgb.reshape((rgb.shape[0] * rgb.shape[1]), 3)
+    color_tuple = rgb.reshape((rgb.shape[0] * rgb.shape[1]), 3)
 
     # Adding an alpha channel will plot faster, according to Stack Overflow. Not sure why.
-    colorTuple = np.insert(colorTuple, 3, 1.0, axis=1)
+    color_tuple = np.insert(color_tuple, 3, 1.0, axis=1)
 
-    return colorTuple
+    return color_tuple
 
 
 def pcolormesh(ax: Axes, image, lons, lats, cmap=None, vmin=None, vmax=None):
-    print('shape', image.shape)
     if len(image.shape) == 3:
-        print('ENTRA')
-        ax.pcolormesh(lons, lats, np.zeros_like(lons),
-                      color=make_color_tuple(image), linewidth=0)
-        # mesh_rgb = image[:, :-1, :]
-        # colorTuple = mesh_rgb.reshape((mesh_rgb.shape[0] * mesh_rgb.shape[1]), 3)
-        # # ADDED THIS LINE
-        # colorTuple = np.insert(colorTuple, 3, 1.0, axis=1)
-        # # What you put in for the image doesn't matter because of the color mapping
-        # print('va pcoolormesh ----->')
-        # ax.pcolormesh(lons, lats, image[:, :, 0], color=colorTuple)
-        print('SALE')
+        color_tuple = make_color_tuple(image)
+        # ax.pcolormesh(lons, lats, np.zeros_like(lons),
+        #               color=color_tuple, linewidth=0)
+        ax.pcolormesh(lons, lats, image[:, :, 0], color=color_tuple)
     else:
         ax.pcolormesh(lons, lats, image, cmap=cmap, vmin=vmin, vmax=vmax)
 
@@ -125,7 +117,6 @@ def save_image(image,
             add_cultural(ax)
         if draw_grid:
             add_grid(ax)
-        print('va colormesh')
         pcolormesh(ax, image, lons, lats, cmap=cmap, vmin=vmin, vmax=vmax)
         fig.add_axes(ax, projection=ccrs.PlateCarree())
         ax.axis('off')
