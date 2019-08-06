@@ -15,7 +15,7 @@ def gamma_correction(image):
     # Apply range limits for each channel. RGB values must be between 0 and 1
     image = cp.clip(image, 0, 1)
     # Apply a gamma correction to the image to correct ABI detector brightness
-    gamma = 1.2 # 2.2
+    gamma = 2.2
     return cp.power(image, 1 / gamma)
 
 
