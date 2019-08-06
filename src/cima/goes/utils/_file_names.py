@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from enum import Enum
+from enum import IntEnum, Enum
 import re
 
 
@@ -42,7 +42,7 @@ class Product(Enum):
     RadM = 'ABI-L1b-RadM'
 
 
-class Band(Enum):
+class Band(IntEnum):
     BLUE = 1
     RED = 2
     VEGGIE = 3
@@ -77,7 +77,7 @@ def path_prefix(year, day_of_year, hour, product=Product.CMIPF):
 
 
 def file_name(band: Band, product=Product.CMIPF, mode=ANY_MODE):
-    return f'{OR}_{product.value}-{mode}C{band.value:02d}_{G16}'
+    return f'{OR}_{product.value}-{mode}C{band:02d}_{G16}'
 
 
 def file_regex_pattern(band: Band, product: Product = Product.CMIPF, mode: str = ANY_MODE):

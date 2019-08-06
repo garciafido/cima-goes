@@ -135,9 +135,29 @@ def save_image(image,
                filepath: str,
                tile: Tile,
                lats, lons,
+               format=None,
                cmap=None, vmin=None, vmax=None,
                draw_cultural=False, draw_grid=False,
                trim_excess=0):
+    if format is None:
+        format = 'png'
+        _, file_extension = os.path.splitext(filepath)
+        if file_extension[0] == '.':
+            format = file_extension[1:]
+    figure = getfig(image, tile, lats, lons, format=format, cmap=None, vmin=None, vmax=None,
+              draw_cultural=draw_cultural, draw_grid=draw_grid, trim_excess=0)
+    storage.upload_stream(figure, filepath)
+    figure.seek(0)
+    return figure
+
+
+def getfig(image,
+           tile: Tile,
+           lats, lons,
+           format='png',
+           cmap=None, vmin=None, vmax=None,
+           draw_cultural=False, draw_grid=False,
+           trim_excess=0):
     image_inches = get_image_inches(image)
     fig = plt.figure(frameon=False)
     try:
@@ -152,15 +172,8 @@ def save_image(image,
         pcolormesh(ax, image, lons, lats, cmap=cmap, vmin=vmin, vmax=vmax)
         fig.add_axes(ax, projection=ccrs.PlateCarree())
         ax.axis('off')
-        
         buffer = io.BytesIO()
-        _, file_extension = os.path.splitext(filepath)
-        format = 'png'
-        if file_extension[0] == '.':
-            format = file_extension[1:]
         plt.savefig(buffer, format=format, dpi=image_inches.dpi, bbox_inches='tight', pad_inches=0)
-        buffer.seek(0)
-        storage.upload_stream(buffer, filepath)
         buffer.seek(0)
         return buffer
     finally:

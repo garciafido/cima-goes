@@ -10,6 +10,10 @@ def timeit(method, log_name: str=None, acum_dict: dict=None):
         if acum_dict is not None:
             acum_dict[name] = int((te - ts) * 1000)
         else:
-            print(f'{name}  {(te - ts) * 1000:.2f} ms')
+            ms = (te - ts) * 1000
+            if ms > 1000:
+                print(f'{name}  {ms/1000.0:.3f} sec.')
+            else:
+                print(f'{name}  {ms:.2f} ms')
         return result
     return timed
