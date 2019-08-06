@@ -45,10 +45,21 @@ TilesDict = Dict[Tuple[int, int], LatLonArea]
 
 def dataset_area_as_dict(dataset_area: DatasetArea) -> dict:
     return {
-        'dataset_key': asdict(dataset_area.sat_band_key),
+        'sat_band_key': asdict(dataset_area.sat_band_key),
         'lan_lot_area': asdict(dataset_area.lan_lot_area),
         'indexes': asdict(dataset_area.indexes)
     }
+
+
+def bands_areas_from_dict(bands_areas_dict: dict) -> Dict[str, DatasetArea]:
+    bands_areas = {}
+    for k, v in bands_areas_dict.items():
+        bands_areas[k] = DatasetArea(
+            sat_band_key=SatBandKey(**v['sat_band_key']),
+            lan_lot_area=LatLonArea(**v['lan_lot_area']),
+            indexes=AreaIndexes(**v['indexes']),
+        )
+    return bands_areas
 
 
 def tiles_to_dict(tiles: TilesDict) -> dict:
