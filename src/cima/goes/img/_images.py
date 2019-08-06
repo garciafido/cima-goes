@@ -50,17 +50,47 @@ def get_cloud_tops_palette():
     return LinearSegmentedColormap('cpt', cpt)
 
 
+def make_colorTuple(RGB, verbose=True):
+    """
+    Convert an 3D RGB array into an color tuple list suitable for plotting with
+    pcolormesh.
+    Input:
+        RGB - a three dimensional array of RGB values from np.dstack([R, G, B])
+    """
+    # Don't use the last column of the RGB array or else the image will be scrambled!
+    # This is the strange nature of pcolormesh.
+    rgb = RGB[:,:-1,:]
+
+    # Flatten the array, because that's what pcolormesh wants.
+    colorTuple = rgb.reshape((rgb.shape[0] * rgb.shape[1]), 3)
+
+    # Adding an alpha channel will plot faster, according to Stack Overflow. Not sure why.
+    colorTuple = np.insert(colorTuple, 3, 1.0, axis=1)
+
+    if verbose:
+        print("\n******************************************")
+        print(" How to use color tuple with pcolormesh:")
+        print(" >>> TC = get_GOES_TrueColor(FILE)")
+        print(" >>> newmap = plt.pcolormesh(TC['lon'], TC['lat'], np.zeros_like(TC['lon']), color=TC['TrueColor Tuple'], linewidth=0)")
+        print(" >>> newmap.set_array(None)")
+        print("******************************************\n")
+
+    return colorTuple
+
+
 def pcolormesh(ax: Axes, image, lons, lats, cmap=None, vmin=None, vmax=None):
     print('shape', image.shape)
     if len(image.shape) == 3:
         print('ENTRA')
-        mesh_rgb = image[:, :-1, :]
-        colorTuple = mesh_rgb.reshape((mesh_rgb.shape[0] * mesh_rgb.shape[1]), 3)
-        # ADDED THIS LINE
-        colorTuple = np.insert(colorTuple, 3, 1.0, axis=1)
-        # What you put in for the image doesn't matter because of the color mapping
-        print('va pcoolormesh ----->')
-        ax.pcolormesh(lons, lats, image[:, :, 0], color=colorTuple)
+        ax.pcolormesh(lons, lats, np.zeros_like(lons),
+                       color=make_colorTuple(image), linewidth=0)
+        # mesh_rgb = image[:, :-1, :]
+        # colorTuple = mesh_rgb.reshape((mesh_rgb.shape[0] * mesh_rgb.shape[1]), 3)
+        # # ADDED THIS LINE
+        # colorTuple = np.insert(colorTuple, 3, 1.0, axis=1)
+        # # What you put in for the image doesn't matter because of the color mapping
+        # print('va pcoolormesh ----->')
+        # ax.pcolormesh(lons, lats, image[:, :, 0], color=colorTuple)
         print('SALE')
     else:
         ax.pcolormesh(lons, lats, image, cmap=cmap, vmin=vmin, vmax=vmax)
