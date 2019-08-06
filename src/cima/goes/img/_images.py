@@ -105,7 +105,11 @@ def save_image(image,
         fig.add_axes(ax, projection=ccrs.PlateCarree())
         ax.axis('off')
         buffer = io.BytesIO()
-        plt.savefig(buffer, dpi=image_inches.dpi, bbox_inches='tight', pad_inches=0)
+        _, file_extension = os.path.splitext(filepath)
+        format = 'png'
+        if file_extension[0] == '.':
+            format = file_extension[1:]
+        plt.savefig(buffer, format=format, dpi=image_inches.dpi, bbox_inches='tight', pad_inches=0)
         buffer.seek(0)
         storage.upload_stream(buffer, filepath)
     finally:
