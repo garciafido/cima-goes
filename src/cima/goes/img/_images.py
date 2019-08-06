@@ -52,12 +52,15 @@ def get_cloud_tops_palette():
 
 def pcolormesh(ax: Axes, image, lons, lats, cmap=None, vmin=None, vmax=None):
     if len(image.shape) == 3:
+        print('ENTRA')
         mesh_rgb = image[:, :-1, :]
         colorTuple = mesh_rgb.reshape((mesh_rgb.shape[0] * mesh_rgb.shape[1]), 3)
         # ADDED THIS LINE
         colorTuple = np.insert(colorTuple, 3, 1.0, axis=1)
         # What you put in for the image doesn't matter because of the color mapping
+        print('va pcoolormesh ----->')
         ax.pcolormesh(lons, lats, image[:, :, 0], color=colorTuple)
+        print('SALE')
     else:
         ax.pcolormesh(lons, lats, image, cmap=cmap, vmin=vmin, vmax=vmax)
 
