@@ -1,7 +1,7 @@
 import io
 import os
+import cv2
 from dataclasses import dataclass
-
 import numpy as np
 import cartopy
 import cartopy.crs as ccrs
@@ -13,6 +13,38 @@ from matplotlib.axes import Axes
 
 
 LOCAL_BASE_PATH = os.path.dirname(os.path.abspath(__file__))
+
+
+def _resize(image, new_size):
+  return cv2.resize(image, dsize=new_size, interpolation=cv2.INTER_CUBIC)
+
+
+def compose_rgb(dataset_red, dataset_veggie, dataset_blue,
+                tile_red: Tile, tile_veggie: Tile, tile_blue: Tile):
+    def gamma_correction(image):
+        # Apply range limits for each channel. RGB values must be between 0 and 1
+        image = np.clip(image, 0, 1)
+        # Apply a gamma correction to the image to correct ABI detector brightness
+        gamma = 2.2
+        return np.power(image, 1 / gamma)
+
+    red_size = (tile_red.x_max - tile_red.x_min, tile_red.y_max - tile_red.y_min)
+    red = dataset_red.variables['CMI'][tile_red.y_min: tile_red.y_max, tile_red.x_min: tile_red.x_max]
+    veggie = dataset_veggie.variables['CMI'][tile_veggie.y_min: tile_veggie.y_max, tile_veggie.x_min: tile_veggie.x_max]
+    blue = dataset_blue.variables['CMI'][tile_blue.y_min: tile_blue.y_max, tile_blue.x_min: tile_blue.x_max]
+
+    red = gamma_correction(red)
+    veggie = gamma_correction(veggie)
+    blue = gamma_correction(blue)
+
+    # Calculate the "True" Green
+    veggie_resized = _resize(veggie, red_size)
+    blue_resized = _resize(blue, red_size)
+    green = 0.48358168 * red + 0.45706946 * blue_resized + 0.06038137 * veggie_resized
+    green = np.clip(green, 0, 1)
+    rgb = np.clip(np.dstack([red, green, blue_resized]), 0, 1)
+
+    return rgb, red, green, blue_resized
 
 
 def add_cultural(ax):
