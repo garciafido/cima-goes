@@ -106,7 +106,8 @@ def save_image(image,
         ax.axis('off')
         buffer = io.BytesIO()
         plt.savefig(buffer, dpi=image_inches.dpi, bbox_inches='tight', pad_inches=0)
-        storage.upload_stream(buffer, filepath + '.png')
+        buffer.seek(0)
+        storage.upload_stream(buffer, filepath)
     finally:
         fig.clear()
         plt.close()
