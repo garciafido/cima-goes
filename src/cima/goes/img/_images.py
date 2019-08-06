@@ -50,7 +50,7 @@ def get_cloud_tops_palette():
     return LinearSegmentedColormap('cpt', cpt)
 
 
-def pcolormesh(ax: Axes, image, lons, lats, cmap='gray', vmin=0, vmax=1):
+def pcolormesh(ax: Axes, image, lons, lats, cmap=None, vmin=None, vmax=None):
     if len(image.shape) == 3:
         mesh_rgb = image[:, :-1, :]
         colorTuple = mesh_rgb.reshape((mesh_rgb.shape[0] * mesh_rgb.shape[1]), 3)
@@ -85,7 +85,7 @@ def save_image(image,
                filepath: str,
                tile: Tile,
                lats, lons,
-               cmap='gray', vmin=0, vmax=1,
+               cmap=None, vmin=None, vmax=None,
                draw_cultural=False, draw_grid=False,
                trim_excess=0):
     image_inches = get_image_inches(image)
