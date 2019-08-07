@@ -44,7 +44,7 @@ def fill_bands_info(goes_storage: GoesStorage, area_dict: dict, bands: List[Prod
         key = band_key_as_string(sat_band_key)
         if key not in area_dict:
             area = get_area(dataset)
-            area_dict[band_key_as_string(area.sat_band_key)] = dataset_area_as_dict(area)
+            area_dict[band_key_as_string(area.sat_band_key)] = area
 
 
 @timeit
