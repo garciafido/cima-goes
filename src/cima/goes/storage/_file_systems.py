@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 class storage_type(Enum):
     NFS = 'nfs' # Local File System
+    ANFS = 'async_nfs' # Local File System
     FTP = 'ftp' # File Transfer Protocol
     AFTP = 'async_ftp' # File Transfer Protocol
     GCS = 'gcs' # Google Cloud Storage

@@ -1,9 +1,11 @@
+import json
 from typing import Dict, Tuple
 
 import pyproj
 import numpy as np
 from dataclasses import dataclass, asdict
 
+from cima.goes.storage._file_systems import Storage
 
 default_major_order = FORTRAN_ORDER = 'F'
 
@@ -41,6 +43,29 @@ class DatasetArea:
 
 
 TilesDict = Dict[Tuple[int, int], LatLonArea]
+AreasDict = Dict[str, DatasetArea]
+
+
+def load_tiles(storage: Storage, filepath) -> TilesDict:
+    data = storage.download_stream(filepath)
+    tiles_dict = json.loads(data)
+    return dict_to_tiles(tiles_dict)
+
+
+def save_tiles(tiles: TilesDict, storage: Storage, filepath):
+    tiles_dict = tiles_to_dict(tiles)
+    storage.upload_stream(bytes(json.dumps(tiles_dict, indent=2), 'utf8'), filepath)
+
+
+def save_areas(areas: AreasDict, storage: Storage, filepath):
+    areas_dict = areas_as_dict(areas)
+    storage.upload_stream(bytes(json.dumps(areas_dict, indent=2), 'utf8'), filepath)
+
+
+def load_areas(storage: Storage, filepath) -> AreasDict:
+    data = storage.download_stream(filepath)
+    areas_dict = json.loads(data)
+    return areas_from_dict(areas_dict)
 
 
 def dataset_area_as_dict(dataset_area: DatasetArea) -> dict:
@@ -51,7 +76,14 @@ def dataset_area_as_dict(dataset_area: DatasetArea) -> dict:
     }
 
 
-def bands_areas_from_dict(bands_areas_dict: dict) -> Dict[str, DatasetArea]:
+def areas_as_dict(areas: AreasDict) -> dict:
+    areas_dict = {}
+    for k, v in areas.items():
+        areas_dict[k] = dataset_area_as_dict(v)
+    return areas_dict
+
+
+def areas_from_dict(bands_areas_dict: dict) -> AreasDict:
     bands_areas = {}
     for k, v in bands_areas_dict.items():
         bands_areas[k] = DatasetArea(

@@ -1,9 +1,9 @@
-import json
 from cima.goes import ProductBand, Product, Band
 from cima.goes.tiles import find_dataset_area, LatLonArea, dataset_area_as_dict, expand_area, band_key_as_string
 from cima.goes.tiles import get_dataset_key
-from cima.goes.tiles import get_tiles, tiles_to_dict
+from cima.goes.tiles import get_tiles
 from cima.goes.utils import timeit
+from cima.goes.tiles import save_tiles, save_areas
 
 
 area = LatLonArea(
@@ -41,7 +41,7 @@ def fill_bands_info(area_dict, bands, year, day_of_year, hour):
             area_dict[band_key_as_string(area.sat_band_key)] = dataset_area_as_dict(area)
 
 
-def generate_areas():
+def generate_areas(storage, filepath):
     area_dict = {}
     fill_bands_info(
         area_dict,
@@ -57,11 +57,10 @@ def generate_areas():
             ProductBand(Product.CMIPF, 13),
             ProductBand(Product.CMIPF, Band.BLUE),
         ], 2019, 60, 12)
+    save_areas(area_dict, storage, filepath)
 
-    print(json.dumps(area_dict, indent=2))
 
-
-def generate_tiles():
+def generate_tiles(storage, filepath):
     tiles = get_tiles(area, lat_step=5, lon_step=5, lat_overlap=lat_overlap, lon_overlap=lon_overlap)
-    print(json.dumps(tiles_to_dict(tiles), indent=2))
+    save_tiles(tiles, storage, filepath)
 

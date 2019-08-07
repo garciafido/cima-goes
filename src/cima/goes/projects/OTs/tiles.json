@@ -1,4 +1,4 @@
-dict_tiles = {
+{
   "(0, 0)": {
     "lat_south": -40.5,
     "lat_north": -44.5,

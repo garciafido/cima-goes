@@ -1,6 +1,7 @@
-from cima.goes.projects.OTs.areas import dict_areas
-from cima.goes.projects.OTs.tiles import dict_tiles
-from cima.goes.tiles import bands_areas_from_dict, dict_to_tiles
+from cima.goes.tiles import load_tiles, load_areas
+from cima.goes.storage import NFS
 
-areas = bands_areas_from_dict(dict_areas)
-tiles = dict_to_tiles(dict_tiles)
+areas = load_areas(NFS(), './areas.json')
+tiles = load_tiles(NFS(), './tiles.json')
+print(areas)
+print(tiles)
