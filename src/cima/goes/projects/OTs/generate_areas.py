@@ -56,7 +56,7 @@ def generate_areas(goes_storage, storage, filepath):
             ProductBand(Product.CMIPF, 2),
             ProductBand(Product.CMIPF, 13),
             ProductBand(Product.CMIPF, Band.BLUE),
-        ], 2017, 7, 1, 12)
+        ], 2017, 8, 1, 12)
     fill_bands_info(goes_storage,
         area_dict,
         [
@@ -64,6 +64,7 @@ def generate_areas(goes_storage, storage, filepath):
             ProductBand(Product.CMIPF, 13),
             ProductBand(Product.CMIPF, Band.BLUE),
         ], 2019, 6, 1, 12)
+    print(area_dict)
     save_areas(area_dict, storage, filepath)
 
 
