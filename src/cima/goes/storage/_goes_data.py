@@ -8,11 +8,11 @@ from netCDF4 import Dataset
 
 class GoesStorage(Storage):
     @abc.abstractmethod
-    def grouped_one_hour_blobs(self, year: int, day_of_year: int, hour: int, bands: List[ProductBand]) -> List[GroupedBandBlobs]:
+    def grouped_one_hour_blobs(self, year: int, month: int, day: int, hour: int, bands: List[ProductBand]) -> List[GroupedBandBlobs]:
         pass
 
     @abc.abstractmethod
-    def one_hour_blobs(self, year: int, day_of_year: int, hour: int, product_band: ProductBand) -> BandBlobs:
+    def one_hour_blobs(self, year: int, month: int, day: int, hour: int, product_band: ProductBand) -> BandBlobs:
         pass
 
     @abc.abstractmethod

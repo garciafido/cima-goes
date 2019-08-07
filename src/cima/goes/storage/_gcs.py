@@ -66,15 +66,15 @@ class GCS(GoesStorage):
         data = self.download_from_blob(blob)
         return netCDF4.Dataset("in_memory_file", mode='r', memory=data)
 
-    def grouped_one_hour_blobs(self, year: int, day_of_year: int, hour: int, product_bands: List[ProductBand]) -> List[GroupedBandBlobs]:
+    def grouped_one_hour_blobs(self, year: int, month: int, day: int, hour: int, product_bands: List[ProductBand]) -> List[GroupedBandBlobs]:
         band_blobs_list: List[BandBlobs] = []
         for product_band in product_bands:
-            blobs = self.band_blobs(year, day_of_year, hour, product_band)
+            blobs = self.band_blobs(year, month, day, hour, product_band)
             band_blobs_list.append(BandBlobs(product_band.product, product_band.band, blobs))
         return self.group_blobs(band_blobs_list)
 
-    def one_hour_blobs(self, year: int, day_of_year: int, hour: int, product_band: ProductBand) -> BandBlobs:
-        blobs = self.band_blobs(year, day_of_year, hour, product_band)
+    def one_hour_blobs(self, year: int, month: int, day: int, hour: int, product_band: ProductBand) -> BandBlobs:
+        blobs = self.band_blobs(year, month, day, hour, product_band)
         return BandBlobs(product_band.product, product_band.band, blobs)
 
     #
@@ -101,9 +101,9 @@ class GCS(GoesStorage):
         bucket = client.get_bucket(self.bucket)
         return bucket.list_blobs(prefix=path, delimiter='/')
 
-    def band_blobs(self, year: int, day_of_year: int, hour: int, product_band: ProductBand) -> List[GoesBlob]:
+    def band_blobs(self, year: int, month: int, day: int, hour: int, product_band: ProductBand) -> List[GoesBlob]:
       return self._list_blobs(
-          path_prefix(year=year, day_of_year=day_of_year, hour=hour, product=product_band.product),
+          path_prefix(year=year, month=month, day=day, hour=hour, product=product_band.product),
           [file_regex_pattern(band=product_band.band, product=product_band.product, mode=self.mode)]
       )
 
@@ -129,8 +129,8 @@ class GCS(GoesStorage):
             result.append(GroupedBandBlobs(start, blobs_list))
         return result
 
-    def get_datasets(self, year: int, day_of_year: int, hour: int, bands: List[Band]):
-        blobs = self.one_hour_blobs(year, day_of_year, hour, bands)
+    def get_datasets(self, year: int, month: int, day: int, hour: int, bands: List[Band]):
+        blobs = self.one_hour_blobs(year, month, day, hour, bands)
         Datasets = namedtuple('Datasets', ['start'] + [band.name for band in bands])
         for blob in blobs:
             data = {band.name: self.get_dataset(getattr(blob, band.name)) for band in bands}

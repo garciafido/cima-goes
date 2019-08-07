@@ -1,7 +1,7 @@
+import datetime
 from dataclasses import dataclass
 from enum import IntEnum, Enum
 import re
-
 
 # File neme pattern:
 # OR_ABI-L2–CMIPF–M3C09_G16_sYYYYJJJHHMMSSs_eYYYYJJJHHMMSSs_cYYYYJJJHHMMSSs.nc
@@ -72,7 +72,12 @@ G16 = 'G16' # GOES-16
 ANY_MODE = 'M.'
 
 
-def path_prefix(year, day_of_year, hour, product=Product.CMIPF):
+def get_day_of_year(year, month, day):
+    return datetime.datetime(year=year, month=month, day=day).timetuple().tm_yday
+
+
+def path_prefix(year: int, month: int, day: int, hour: int, product=Product.CMIPF):
+    day_of_year = get_day_of_year(year, month, day)
     return f'{product.value}/{year:04d}/{day_of_year:03d}/{hour:02d}/'
 
 
@@ -85,7 +90,7 @@ def file_regex_pattern(band: Band, product: Product = Product.CMIPF, mode: str =
 
 
 def slice_obs_start(product=Product.CMIPF):
-    prefix_pos = len(path_prefix(year=1111, day_of_year=11, hour=11, product=product)) + len(
+    prefix_pos = len(path_prefix(year=1111, month=1, day=1, hour=11, product=product)) + len(
         file_name(band=Band.RED, product=product)) + 2
     return slice(prefix_pos, prefix_pos + len('20183650045364'))
 
