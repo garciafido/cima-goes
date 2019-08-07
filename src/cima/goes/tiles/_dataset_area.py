@@ -69,6 +69,14 @@ def tiles_to_dict(tiles: TilesDict) -> dict:
     return tiles_dict
 
 
+def dict_to_tiles(tiles: dict) -> TilesDict:
+    from ast import literal_eval
+    tiles_dict = {}
+    for k, v in tiles.items():
+        tiles_dict[literal_eval(k)] = LatLonArea(**v)
+    return tiles_dict
+
+
 def band_key_as_string(band_key: SatBandKey) -> str:
     return f'{band_key.sat_height}#{band_key.sat_lon}#{band_key.sat_sweep}#{band_key.x_size}#{band_key.y_size}'
 
