@@ -184,6 +184,7 @@ def get_dataset_key(dataset) -> SatBandKey:
 def find_dataset_region(dataset, lat_lon_region: LatLonRegion, major_order=default_major_order) -> DatasetRegion:
     sat_band_key = get_dataset_key(dataset)
     lats, lons = get_lats_lons(dataset)
+    print('lat_lon_region', lat_lon_region)
     indexes = find_indexes(lat_lon_region, lats, lons, major_order)
     return DatasetRegion(
         sat_band_key=sat_band_key,
