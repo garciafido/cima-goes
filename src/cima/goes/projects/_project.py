@@ -1,6 +1,6 @@
 import datetime
 from dataclasses import dataclass
-from typing import List, Callable, Any
+from typing import List, Callable, Any, Dict
 
 from cima.goes import ProductBand
 from cima.goes.storage import BandBlobs, GoesBlob, GoesStorage, GroupedBandBlobs
@@ -30,7 +30,7 @@ class Project(object):
                  tiles: TilesDict,
                  bands: List[ProductBand],
                  date_ranges: List[DatesRange],
-                 process_minute_blobs: Callable[[int, int, int, int, int, List[BandBlobs]], Any]
+                 process_minute_blobs: Callable[[int, int, int, int, int, List[BandBlobs], List[Any], Dict[str, Any]], Any]
                  ):
         self.region = region
         self.tiles = tiles
@@ -39,7 +39,7 @@ class Project(object):
         self.goes_storage = goes_storage
         self.process_minute_blobs = process_minute_blobs
 
-    def run(self):
+    def run(self, *args, kwargs):
         def dates_range(date_range: DatesRange):
             current_date = date_range.from_date
             last_date = date_range.to_date
@@ -56,7 +56,7 @@ class Project(object):
                             self.bands)
                         for grouped_blobs in grouped_blobs_list:
                             minute = int(grouped_blobs.start[9:11])
-                            self.process_minute_blobs(date.year, date.month, date.day, hour, minute, grouped_blobs.blobs)
+                            self.process_minute_blobs(date.year, date.month, date.day, hour, minute, grouped_blobs.blobs, *args, **kwargs)
 
 
 
