@@ -165,13 +165,16 @@ def getfig(image,
         ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
         ax.set_axis_off()
         set_extent(ax, region, trim_excess)
+
         if draw_cultural:
             add_cultural(ax)
         if draw_grid:
             add_grid(ax)
+        else:
+            ax.axis('off')
+
         pcolormesh(ax, image, lons, lats, cmap=cmap, vmin=vmin, vmax=vmax)
         fig.add_axes(ax, projection=ccrs.PlateCarree())
-        ax.axis('off')
         buffer = io.BytesIO()
         plt.savefig(buffer, format=format, dpi=image_inches.dpi, bbox_inches='tight', pad_inches=0)
         buffer.seek(0)

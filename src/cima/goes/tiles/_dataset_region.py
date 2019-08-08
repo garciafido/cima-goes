@@ -13,8 +13,8 @@ default_major_order = FORTRAN_ORDER = 'F'
 
 @dataclass
 class LatLonRegion:
-    lat_south: float
     lat_north: float
+    lat_south: float
     lon_west: float
     lon_east: float
 
@@ -237,16 +237,19 @@ def get_tiles(region: LatLonRegion,
               lat_overlap: float,
               lon_overlap: float) -> TilesDict:
     tiles = {}
-    lats = [x for x in np.arange(region.lat_south, region.lat_north, lat_step)]
+    lat_step = -lat_step
+    lats = [x for x in np.arange(region.lat_north, region.lat_south, lat_step)]
+    print(lats)
     lons = [x for x in np.arange(region.lon_west, region.lon_east, lon_step)]
-    for lon_index, lon in enumerate(lons):
-        for lat_index, lat in enumerate(lats):
+    print(lons)
+    for lat_index, lat in enumerate(lats):
+        for lon_index, lon in enumerate(lons):
             tiles[(lat_index, lon_index)] = expand_region(
-                LatLonRegion(
-                    lat_north=float(lat),
-                    lat_south=float(lat + lat_step),
-                    lon_west=float(lon),
-                    lon_east=float(lon + lon_step)),
-                lat_overlap,
-                lon_overlap)
+            LatLonRegion(
+                lat_north=float(lat),
+                lat_south=float(lat + lat_step),
+                lon_west=float(lon),
+                lon_east=float(lon + lon_step)),
+            lat_overlap,
+            lon_overlap)
     return tiles
