@@ -23,17 +23,13 @@ class DatesRange:
     hours_ranges: List[HoursRange]
 
 
-class Project(object):
+class BatchProcess(object):
     def __init__(self,
                  goes_storage: GoesStorage,
-                 region: RegionData,
-                 tiles: TilesDict,
                  bands: List[ProductBand],
                  date_ranges: List[DatesRange],
                  process_minute_blobs: Callable[[int, int, int, int, int, List[BandBlobs], List[Any], Dict[str, Any]], Any]
                  ):
-        self.region = region
-        self.tiles = tiles
         self.bands = bands
         self.date_ranges = date_ranges
         self.goes_storage = goes_storage
@@ -57,6 +53,3 @@ class Project(object):
                         for grouped_blobs in grouped_blobs_list:
                             minute = int(grouped_blobs.start[9:11])
                             self.process_minute_blobs(date.year, date.month, date.day, hour, minute, grouped_blobs.blobs, *args, **kwargs)
-
-
-
