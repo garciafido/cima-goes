@@ -3,9 +3,9 @@ from typing import List
 from cima.goes import ProductBand, Product, Band
 from cima.goes.tiles import LatLonArea, expand_area
 from cima.goes.tiles import get_tiles
-from cima.goes.tiles import AreasDict, generate_areas
+from cima.goes.tiles import RegionData, generate_region_data
 from cima.goes.utils import timeit
-from cima.goes.tiles import save_tiles, save_areas
+from cima.goes.tiles import save_tiles, save_region_data
 
 area = LatLonArea(
         lat_south=-45,
@@ -23,14 +23,14 @@ expanded_area = expand_area(area, lon=lon_overlap+lon_excess, lat=lat_overlap+la
 
 @timeit
 def generate_areas_data(goes_storage, storage, filepath):
-    area_dict: AreasDict = generate_areas(
+    area_dict: RegionData = generate_region_data(
         goes_storage, [
             ProductBand(Product.CMIPF, 2),
             ProductBand(Product.CMIPF, 13),
             ProductBand(Product.CMIPF, Band.BLUE),
         ])
     print(area_dict)
-    save_areas(area_dict, storage, filepath)
+    save_region_data(area_dict, storage, filepath)
 
 
 @timeit

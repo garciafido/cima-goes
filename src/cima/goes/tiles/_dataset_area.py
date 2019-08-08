@@ -43,14 +43,14 @@ class DatasetArea:
 
 
 TilesDict = Dict[Tuple[int, int], LatLonArea]
-AreasDict = Dict[str, DatasetArea]
+RegionData = Dict[str, DatasetArea]
 
 
-def generate_areas(goes_storage, bands: List[ProductBand]) -> AreasDict:
-    area_dict: AreasDict = {}
-    fill_bands_info(goes_storage, area_dict, bands, 2017, 8, 1, 12)
-    fill_bands_info(goes_storage, area_dict, bands, 2019, 6, 1, 12)
-    return area_dict
+def generate_region_data(goes_storage, area: LatLonArea, bands: List[ProductBand]) -> RegionData:
+    area_indexes_dict: RegionData = {}
+    fill_bands_info(goes_storage, area, area_indexes_dict, bands, 2017, 8, 1, 12)
+    fill_bands_info(goes_storage, area, area_indexes_dict, bands, 2019, 6, 1, 12)
+    return area_indexes_dict
 
 
 def get_one_dataset(goes_storage: GoesStorage, product_band: ProductBand, year: int, month: int, day: int, hour: int):
@@ -60,15 +60,15 @@ def get_one_dataset(goes_storage: GoesStorage, product_band: ProductBand, year: 
     return dataset
 
 
-def fill_bands_info(goes_storage: GoesStorage, area_dict: dict, bands: List[ProductBand],
+def fill_bands_info(goes_storage: GoesStorage, area: LatLonArea, area_indexes_dict: dict, bands: List[ProductBand],
                     year: int, month: int, day: int, hour: int):
     for band in bands:
         dataset = get_one_dataset(goes_storage, band, year, month, day, hour)
         sat_band_key = get_dataset_key(dataset)
         key = band_key_as_string(sat_band_key)
-        if key not in area_dict:
-            area = find_dataset_area(dataset)
-            area_dict[band_key_as_string(area.sat_band_key)] = area
+        if key not in area_indexes_dict:
+            area = find_dataset_area(dataset, area)
+            area_indexes_dict[band_key_as_string(area.sat_band_key)] = area
 
 
 def load_tiles(storage: Storage, filepath) -> TilesDict:
@@ -82,15 +82,15 @@ def save_tiles(tiles: TilesDict, storage: Storage, filepath):
     storage.upload_data(bytes(json.dumps(tiles_dict, indent=2), 'utf8'), filepath)
 
 
-def save_areas(areas: AreasDict, storage: Storage, filepath):
-    areas_dict = areas_as_dict(areas)
-    storage.upload_data(bytes(json.dumps(areas_dict, indent=2), 'utf8'), filepath)
+def save_region_data(region_data: RegionData, storage: Storage, filepath):
+    region_dict = region_data_as_dict(region_data)
+    storage.upload_data(bytes(json.dumps(region_dict, indent=2), 'utf8'), filepath)
 
 
-def load_areas(storage: Storage, filepath) -> AreasDict:
+def load_region_data(storage: Storage, filepath) -> RegionData:
     data = storage.download_data(filepath)
-    areas_dict = json.loads(data)
-    return areas_from_dict(areas_dict)
+    region_dict = json.loads(data)
+    return region_data_from_dict(region_dict)
 
 
 def dataset_area_as_dict(dataset_area: DatasetArea) -> dict:
@@ -101,14 +101,14 @@ def dataset_area_as_dict(dataset_area: DatasetArea) -> dict:
     }
 
 
-def areas_as_dict(areas: AreasDict) -> dict:
+def region_data_as_dict(areas: RegionData) -> dict:
     areas_dict = {}
     for k, v in areas.items():
         areas_dict[k] = dataset_area_as_dict(v)
     return areas_dict
 
 
-def areas_from_dict(bands_areas_dict: dict) -> AreasDict:
+def region_data_from_dict(bands_areas_dict: dict) -> RegionData:
     bands_areas = {}
     for k, v in bands_areas_dict.items():
         bands_areas[k] = DatasetArea(

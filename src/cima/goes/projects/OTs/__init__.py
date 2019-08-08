@@ -1,1 +1,1 @@
-from cima.goes.projects.OTs.generate_areas import generate_tiles, generate_areas
+from cima.goes.projects.OTs.generate_areas import generate_tiles, generate_region_data
