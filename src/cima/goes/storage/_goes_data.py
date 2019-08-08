@@ -16,5 +16,9 @@ class GoesStorage(Storage):
         pass
 
     @abc.abstractmethod
+    def get_blob(self, name: str) -> GoesBlob:
+        pass
+
+    @abc.abstractmethod
     def get_dataset(self, blob: GoesBlob) -> Dataset:
         pass

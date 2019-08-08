@@ -107,6 +107,11 @@ class GCS(GoesStorage):
         bucket = client.get_bucket(self.bucket)
         return bucket.list_blobs(prefix=path, delimiter='/')
 
+    def get_blob(self, name: str):
+        client = gcs.Client(credentials=self.credentials, project='')
+        bucket = client.get_bucket(self.bucket)
+        return bucket.blob(name)
+
     def band_blobs(self, year: int, month: int, day: int, hour: int, product_band: ProductBand) -> List[GoesBlob]:
       return self._list_blobs(
           path_prefix(year=year, month=month, day=day, hour=hour, product=product_band.product),
