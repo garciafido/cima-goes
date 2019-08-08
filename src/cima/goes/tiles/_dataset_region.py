@@ -11,7 +11,7 @@ default_major_order = FORTRAN_ORDER = 'F'
 
 
 @dataclass
-class LatLonArea:
+class LatLonRegion:
     lat_south: float
     lat_north: float
     lon_west: float
@@ -19,7 +19,7 @@ class LatLonArea:
 
 
 @dataclass
-class AreaIndexes:
+class RegionIndexes:
     x_min: int = None
     x_max: int = None
     y_min: int = None
@@ -36,21 +36,21 @@ class SatBandKey:
 
 
 @dataclass
-class DatasetArea:
+class DatasetRegion:
     sat_band_key: SatBandKey
-    lan_lot_area: LatLonArea
-    indexes: AreaIndexes
+    lan_lot_area: LatLonRegion
+    indexes: RegionIndexes
 
 
-TilesDict = Dict[Tuple[int, int], LatLonArea]
-RegionData = Dict[str, DatasetArea]
+TilesDict = Dict[Tuple[int, int], LatLonRegion]
+RegionData = Dict[str, DatasetRegion]
 
 
-def generate_region_data(goes_storage, area: LatLonArea, bands: List[ProductBand]) -> RegionData:
-    area_indexes_dict: RegionData = {}
-    fill_bands_info(goes_storage, area, area_indexes_dict, bands, 2017, 8, 1, 12)
-    fill_bands_info(goes_storage, area, area_indexes_dict, bands, 2019, 6, 1, 12)
-    return area_indexes_dict
+def generate_region_data(goes_storage, lat_lon_region: LatLonRegion, bands: List[ProductBand]) -> RegionData:
+    region_indexes_dict: RegionData = {}
+    fill_bands_info(goes_storage, lat_lon_region, region_indexes_dict, bands, 2017, 8, 1, 12)
+    fill_bands_info(goes_storage, lat_lon_region, region_indexes_dict, bands, 2019, 6, 1, 12)
+    return region_indexes_dict
 
 
 def get_one_dataset(goes_storage: GoesStorage, product_band: ProductBand, year: int, month: int, day: int, hour: int):
@@ -60,15 +60,15 @@ def get_one_dataset(goes_storage: GoesStorage, product_band: ProductBand, year: 
     return dataset
 
 
-def fill_bands_info(goes_storage: GoesStorage, area: LatLonArea, area_indexes_dict: dict, bands: List[ProductBand],
+def fill_bands_info(goes_storage: GoesStorage, lat_lon_region: LatLonRegion, region_indexes_dict: dict, bands: List[ProductBand],
                     year: int, month: int, day: int, hour: int):
     for band in bands:
         dataset = get_one_dataset(goes_storage, band, year, month, day, hour)
         sat_band_key = get_dataset_key(dataset)
         key = band_key_as_string(sat_band_key)
-        if key not in area_indexes_dict:
-            area = find_dataset_area(dataset, area)
-            area_indexes_dict[band_key_as_string(area.sat_band_key)] = area
+        if key not in region_indexes_dict:
+            lat_lon_region = find_dataset_region(dataset, lat_lon_region)
+            region_indexes_dict[band_key_as_string(lat_lon_region.sat_band_key)] = lat_lon_region
 
 
 def load_tiles(storage: Storage, filepath) -> TilesDict:
@@ -93,30 +93,30 @@ def load_region_data(storage: Storage, filepath) -> RegionData:
     return region_data_from_dict(region_dict)
 
 
-def dataset_area_as_dict(dataset_area: DatasetArea) -> dict:
+def dataset_region_as_dict(dataset_region: DatasetRegion) -> dict:
     return {
-        'sat_band_key': asdict(dataset_area.sat_band_key),
-        'lan_lot_area': asdict(dataset_area.lan_lot_area),
-        'indexes': asdict(dataset_area.indexes)
+        'sat_band_key': asdict(dataset_region.sat_band_key),
+        'lan_lot_area': asdict(dataset_region.lan_lot_area),
+        'indexes': asdict(dataset_region.indexes)
     }
 
 
-def region_data_as_dict(areas: RegionData) -> dict:
-    areas_dict = {}
-    for k, v in areas.items():
-        areas_dict[k] = dataset_area_as_dict(v)
-    return areas_dict
+def region_data_as_dict(region_data: RegionData) -> dict:
+    region_dict = {}
+    for k, v in region_data.items():
+        region_dict[k] = dataset_region_as_dict(v)
+    return region_dict
 
 
-def region_data_from_dict(bands_areas_dict: dict) -> RegionData:
-    bands_areas = {}
-    for k, v in bands_areas_dict.items():
-        bands_areas[k] = DatasetArea(
+def region_data_from_dict(bands_region_dict: dict) -> RegionData:
+    bands_region = {}
+    for k, v in bands_region_dict.items():
+        bands_region[k] = DatasetRegion(
             sat_band_key=SatBandKey(**v['sat_band_key']),
-            lan_lot_area=LatLonArea(**v['lan_lot_area']),
-            indexes=AreaIndexes(**v['indexes']),
+            lan_lot_area=LatLonRegion(**v['lan_lot_area']),
+            indexes=RegionIndexes(**v['indexes']),
         )
-    return bands_areas
+    return bands_region
 
 
 def tiles_to_dict(tiles: TilesDict) -> dict:
@@ -130,7 +130,7 @@ def dict_to_tiles(tiles: dict) -> TilesDict:
     from ast import literal_eval
     tiles_dict = {}
     for k, v in tiles.items():
-        tiles_dict[literal_eval(k)] = LatLonArea(**v)
+        tiles_dict[literal_eval(k)] = LatLonRegion(**v)
     return tiles_dict
 
 
@@ -143,16 +143,16 @@ def dataset_key_as_string(dataset) -> str:
     return band_key_as_string(band_key)
 
 
-def expand_area(area: LatLonArea, lat, lon):
-    return LatLonArea(
-        lat_south=area.lat_south - lat,
-        lat_north=area.lat_north + lat,
-        lon_west=area.lon_west - lon,
-        lon_east=area.lon_east + lon,
+def expand_region(region: LatLonRegion, lat, lon):
+    return LatLonRegion(
+        lat_south=region.lat_south - lat,
+        lat_north=region.lat_north + lat,
+        lon_west=region.lon_west - lon,
+        lon_east=region.lon_east + lon,
     )
 
 
-def get_lats_lons(dataset, indexes: AreaIndexes = None):
+def get_lats_lons(dataset, indexes: RegionIndexes = None):
     dataset_key = get_dataset_key(dataset)
     if indexes is None:
         x = dataset['x'][:] * dataset_key.sat_height
@@ -181,13 +181,13 @@ def get_dataset_key(dataset) -> SatBandKey:
     )
 
 
-def find_dataset_area(dataset, area: LatLonArea, major_order=default_major_order) -> DatasetArea:
+def find_dataset_region(dataset, lat_lon_region: LatLonRegion, major_order=default_major_order) -> DatasetRegion:
     sat_band_key = get_dataset_key(dataset)
     lats, lons = get_lats_lons(dataset)
-    indexes = find_indexes(area, lats, lons, major_order)
-    return DatasetArea(
+    indexes = find_indexes(lat_lon_region, lats, lons, major_order)
+    return DatasetRegion(
         sat_band_key=sat_band_key,
-        lan_lot_area=area,
+        lan_lot_area=lat_lon_region,
         indexes=indexes
     )
 
@@ -197,13 +197,13 @@ def nearest_indexes(lat, lon, lats, lons, major_order):
     return np.unravel_index(np.argmin(distance), lats.shape, major_order)
 
 
-def find_indexes(area: LatLonArea, lats, lons, major_order) -> AreaIndexes:
-    x1, y1 = nearest_indexes(area.lat_north, area.lon_west, lats, lons, major_order)
-    x2, y2 = nearest_indexes(area.lat_north, area.lon_east, lats, lons, major_order)
-    x3, y3 = nearest_indexes(area.lat_south, area.lon_west, lats, lons, major_order)
-    x4, y4 = nearest_indexes(area.lat_south, area.lon_east, lats, lons, major_order)
+def find_indexes(region: LatLonRegion, lats, lons, major_order) -> RegionIndexes:
+    x1, y1 = nearest_indexes(region.lat_north, region.lon_west, lats, lons, major_order)
+    x2, y2 = nearest_indexes(region.lat_north, region.lon_east, lats, lons, major_order)
+    x3, y3 = nearest_indexes(region.lat_south, region.lon_west, lats, lons, major_order)
+    x4, y4 = nearest_indexes(region.lat_south, region.lon_east, lats, lons, major_order)
 
-    indexes = AreaIndexes()
+    indexes = RegionIndexes()
     indexes.x_min = int(min(x1, x2, x3, x4))
     indexes.x_max = int(max(x1, x2, x3, x4))
     indexes.y_min = int(min(y1, y2, y3, y4))
@@ -211,18 +211,18 @@ def find_indexes(area: LatLonArea, lats, lons, major_order) -> AreaIndexes:
     return indexes
 
 
-def get_tiles(area: LatLonArea,
+def get_tiles(region: LatLonRegion,
               lat_step: float,
               lon_step: float,
               lat_overlap: float,
               lon_overlap: float) -> TilesDict:
     tiles = {}
-    lats = [x for x in np.arange(area.lat_south, area.lat_north, lat_step)]
-    lons = [x for x in np.arange(area.lon_west, area.lon_east, lon_step)]
+    lats = [x for x in np.arange(region.lat_south, region.lat_north, lat_step)]
+    lons = [x for x in np.arange(region.lon_west, region.lon_east, lon_step)]
     for lon_index, lon in enumerate(lons):
         for lat_index, lat in enumerate(lats):
-            tiles[(lat_index, lon_index)] = expand_area(
-                LatLonArea(
+            tiles[(lat_index, lon_index)] = expand_region(
+                LatLonRegion(
                     lat_north=float(lat),
                     lat_south=float(lat + lat_step),
                     lon_west=float(lon),

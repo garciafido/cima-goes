@@ -1,13 +1,13 @@
 from typing import List
 
 from cima.goes import ProductBand, Product, Band
-from cima.goes.tiles import LatLonArea, expand_area
+from cima.goes.tiles import LatLonRegion, expand_region
 from cima.goes.tiles import get_tiles
 from cima.goes.tiles import RegionData, generate_region_data
 from cima.goes.utils import timeit
 from cima.goes.tiles import save_tiles, save_region_data
 
-area = LatLonArea(
+area = LatLonRegion(
         lat_south=-45,
         lat_north=-20,
         lon_west=-75,
@@ -18,7 +18,7 @@ lon_excess = 0.5
 lat_excess = 0.5
 lon_overlap = 1.0
 lat_overlap = 1.0
-expanded_area = expand_area(area, lon=lon_overlap+lon_excess, lat=lat_overlap+lat_excess)
+expanded_area = expand_region(area, lon=lon_overlap + lon_excess, lat=lat_overlap + lat_excess)
 
 
 @timeit
