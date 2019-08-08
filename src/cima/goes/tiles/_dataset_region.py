@@ -3,6 +3,7 @@ from dataclasses import dataclass, asdict
 from typing import Dict, Tuple, List
 import numpy as np
 import pyproj
+from netCDF4 import Dataset
 from cima.goes.storage._file_systems import Storage
 from cima.goes.storage._goes_data import GoesStorage
 from cima.goes.utils._file_names import ProductBand
@@ -44,6 +45,11 @@ class DatasetRegion:
 
 TilesDict = Dict[Tuple[int, int], LatLonRegion]
 RegionData = Dict[str, DatasetRegion]
+
+
+def get_dataset_region(dataset: Dataset, region_data: RegionData) -> DatasetRegion:
+    sat_band_key = get_dataset_key(dataset)
+    return region_data[band_key_as_string(sat_band_key)]
 
 
 def get_tile_extent(region: LatLonRegion, trim_excess=0) -> tuple:
@@ -181,7 +187,7 @@ def get_data(dataset, indexes: RegionIndexes, variable: str = 'CMI'):
     return dataset.variables[variable][indexes.y_min : indexes.y_max, indexes.x_min : indexes.x_max]
 
 
-def get_dataset_key(dataset) -> SatBandKey:
+def get_dataset_key(dataset: Dataset) -> SatBandKey:
     imager_projection = dataset['goes_imager_projection']
     sat_height = imager_projection.perspective_point_height
     sat_lon = imager_projection.longitude_of_projection_origin
