@@ -6,6 +6,8 @@ from cima.goes import ProductBand
 from cima.goes.storage import GoesBlob, GoesStorage, GroupedBandBlobs
 from cima.goes.tiles import RegionData, TilesDict
 
+from build.lib.cima.goes.storage._blobs import BandBlobs
+
 
 @dataclass
 class HoursRange:
@@ -30,7 +32,7 @@ class Project(object):
                  tiles: TilesDict,
                  bands: List[ProductBand],
                  date_ranges: List[DatesRange],
-                 process_minute_blobs: Callable[[GroupedBandBlobs], Any]
+                 process_minute_blobs: Callable[[int, int, int, int, int, List[BandBlobs]], Any]
                  ):
         self.region = region
         self.tiles = tiles
@@ -55,7 +57,8 @@ class Project(object):
                             date.year, date.month, date.day, hour,
                             self.bands)
                         for grouped_blobs in grouped_blobs_list:
-                            self.process_minute_blobs(grouped_blobs)
+                            minute = int(grouped_blobs.start[9:11])
+                            self.process_minute_blobs(date.year, date.month, date.day, hour, minute, grouped_blobs.blobs)
 
 
 
