@@ -28,14 +28,13 @@ class BatchProcess(object):
                  goes_storage: GoesStorage,
                  bands: List[ProductBand],
                  date_ranges: List[DatesRange],
-                 process_minute_blobs: Callable[[int, int, int, int, int, List[BandBlobs], List[Any], Dict[str, Any]], Any]
                  ):
         self.bands = bands
         self.date_ranges = date_ranges
         self.goes_storage = goes_storage
-        self.process_minute_blobs = process_minute_blobs
 
-    def run(self, *args, **kwargs):
+    def run(self, process: Callable[[int, int, int, int, int, List[BandBlobs], List[Any], Dict[str, Any]], Any],
+            *args, **kwargs):
         def dates_range(date_range: DatesRange):
             current_date = date_range.from_date
             last_date = date_range.to_date
@@ -52,4 +51,4 @@ class BatchProcess(object):
                             self.bands)
                         for grouped_blobs in grouped_blobs_list:
                             minute = int(grouped_blobs.start[9:11])
-                            self.process_minute_blobs(date.year, date.month, date.day, hour, minute, grouped_blobs.blobs, *args, **kwargs)
+                            process(date.year, date.month, date.day, hour, minute, grouped_blobs.blobs, *args, **kwargs)
