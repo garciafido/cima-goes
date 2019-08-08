@@ -1,10 +1,11 @@
 import json
 from dataclasses import dataclass, asdict
-from typing import Dict, Tuple
-
+from typing import Dict, Tuple, List
 import numpy as np
 import pyproj
 from cima.goes.storage._file_systems import Storage
+from cima.goes.storage._goes_data import GoesStorage
+from cima.goes.utils._file_names import ProductBand
 
 default_major_order = FORTRAN_ORDER = 'F'
 
@@ -43,6 +44,31 @@ class DatasetArea:
 
 TilesDict = Dict[Tuple[int, int], LatLonArea]
 AreasDict = Dict[str, DatasetArea]
+
+
+def generate_areas(goes_storage, bands: List[ProductBand]) -> AreasDict:
+    area_dict: AreasDict = {}
+    fill_bands_info(goes_storage, area_dict, bands, 2017, 8, 1, 12)
+    fill_bands_info(goes_storage, area_dict, bands, 2019, 6, 1, 12)
+    return area_dict
+
+
+def get_one_dataset(goes_storage: GoesStorage, product_band: ProductBand, year: int, month: int, day: int, hour: int):
+    band_blobs = goes_storage.one_hour_blobs(year, month, day, hour, product_band)
+    blob = band_blobs.blobs[0]
+    dataset = goes_storage.get_dataset(blob)
+    return dataset
+
+
+def fill_bands_info(goes_storage: GoesStorage, area_dict: dict, bands: List[ProductBand],
+                    year: int, month: int, day: int, hour: int):
+    for band in bands:
+        dataset = get_one_dataset(goes_storage, band, year, month, day, hour)
+        sat_band_key = get_dataset_key(dataset)
+        key = band_key_as_string(sat_band_key)
+        if key not in area_dict:
+            area = find_dataset_area(dataset)
+            area_dict[band_key_as_string(area.sat_band_key)] = area
 
 
 def load_tiles(storage: Storage, filepath) -> TilesDict:
@@ -204,44 +230,3 @@ def get_tiles(area: LatLonArea,
                 lat_overlap,
                 lon_overlap)
     return tiles
-
-
-a = {'35786023.0#-89.5#x#21696#21696': DatasetArea(
-    sat_band_key=SatBandKey(sat_height=35786023.0, sat_lon=-89.5, sat_sweep='x', x_size=21696, y_size=21696),
-    lan_lot_area=LatLonArea(lat_south=-46.5, lat_north=-18.5, lon_west=-76.5, lon_east=-43.5),
-    indexes=AreaIndexes(x_min=12699, x_max=18990, y_min=14628, y_max=19486)),
-     '35786023.0#-89.5#x#5424#5424': DatasetArea(
-         sat_band_key=SatBandKey(sat_height=35786023.0, sat_lon=-89.5, sat_sweep='x', x_size=5424, y_size=5424),
-         lan_lot_area=LatLonArea(lat_south=-46.5, lat_north=-18.5, lon_west=-76.5, lon_east=-43.5),
-         indexes=AreaIndexes(x_min=3174, x_max=4747, y_min=3657, y_max=4871)),
-     '35786023.0#-89.5#x#10848#10848': DatasetArea(
-         sat_band_key=SatBandKey(sat_height=35786023.0, sat_lon=-89.5, sat_sweep='x', x_size=10848, y_size=10848),
-         lan_lot_area=LatLonArea(lat_south=-46.5, lat_north=-18.5, lon_west=-76.5, lon_east=-43.5),
-         indexes=AreaIndexes(x_min=6349, x_max=9495, y_min=7314, y_max=9743)),
-     '35786023.0#-75.0#x#21696#21696': DatasetArea(
-         sat_band_key=SatBandKey(sat_height=35786023.0, sat_lon=-75.0, sat_sweep='x', x_size=21696, y_size=21696),
-         lan_lot_area=LatLonArea(lat_south=-46.5, lat_north=-18.5, lon_west=-76.5, lon_east=-43.5),
-         indexes=AreaIndexes(x_min=10535, x_max=16926, y_min=14725, y_max=19512)),
-     '35786023.0#-75.0#x#5424#5424': DatasetArea(
-         sat_band_key=SatBandKey(sat_height=35786023.0, sat_lon=-75.0, sat_sweep='x', x_size=5424, y_size=5424),
-         lan_lot_area=LatLonArea(lat_south=-46.5, lat_north=-18.5, lon_west=-76.5, lon_east=-43.5),
-         indexes=AreaIndexes(x_min=2633, x_max=4231, y_min=3681, y_max=4878)),
-     '35786023.0#-75.0#x#10848#10848': DatasetArea(
-         sat_band_key=SatBandKey(sat_height=35786023.0, sat_lon=-75.0, sat_sweep='x', x_size=10848, y_size=10848),
-         lan_lot_area=LatLonArea(lat_south=-46.5, lat_north=-18.5, lon_west=-76.5, lon_east=-43.5),
-         indexes=AreaIndexes(x_min=5267, x_max=8463, y_min=7362, y_max=9756))}
-
-
-from cima.goes.storage import NFS, FTP
-ad = areas_as_dict(a)
-adb = bytes(json.dumps(ad, indent=2), 'utf8')
-# NFS().upload_stream(adb, './areas.json')
-
-FTP_HOST = 'mate.cima.fcen.uba.ar'
-FTP_USER = 'ftp_alertar'
-FTP_PASSWORD = 'Dra6h&b3wUDr'
-ftp = FTP(
-    host=FTP_HOST,
-    user=FTP_USER,
-    password=FTP_PASSWORD)
-ftp.upload_data(adb, '/OTs/areas/areas.json')

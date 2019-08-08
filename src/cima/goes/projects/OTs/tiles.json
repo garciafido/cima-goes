@@ -1,0 +1,182 @@
+{
+  "(0, 0)": {
+    "lat_south": -41.0,
+    "lat_north": -44.0,
+    "lon_west": -76.0,
+    "lon_east": -69.0
+  },
+  "(1, 0)": {
+    "lat_south": -36.0,
+    "lat_north": -39.0,
+    "lon_west": -76.0,
+    "lon_east": -69.0
+  },
+  "(2, 0)": {
+    "lat_south": -31.0,
+    "lat_north": -34.0,
+    "lon_west": -76.0,
+    "lon_east": -69.0
+  },
+  "(3, 0)": {
+    "lat_south": -26.0,
+    "lat_north": -29.0,
+    "lon_west": -76.0,
+    "lon_east": -69.0
+  },
+  "(4, 0)": {
+    "lat_south": -21.0,
+    "lat_north": -24.0,
+    "lon_west": -76.0,
+    "lon_east": -69.0
+  },
+  "(0, 1)": {
+    "lat_south": -41.0,
+    "lat_north": -44.0,
+    "lon_west": -71.0,
+    "lon_east": -64.0
+  },
+  "(1, 1)": {
+    "lat_south": -36.0,
+    "lat_north": -39.0,
+    "lon_west": -71.0,
+    "lon_east": -64.0
+  },
+  "(2, 1)": {
+    "lat_south": -31.0,
+    "lat_north": -34.0,
+    "lon_west": -71.0,
+    "lon_east": -64.0
+  },
+  "(3, 1)": {
+    "lat_south": -26.0,
+    "lat_north": -29.0,
+    "lon_west": -71.0,
+    "lon_east": -64.0
+  },
+  "(4, 1)": {
+    "lat_south": -21.0,
+    "lat_north": -24.0,
+    "lon_west": -71.0,
+    "lon_east": -64.0
+  },
+  "(0, 2)": {
+    "lat_south": -41.0,
+    "lat_north": -44.0,
+    "lon_west": -66.0,
+    "lon_east": -59.0
+  },
+  "(1, 2)": {
+    "lat_south": -36.0,
+    "lat_north": -39.0,
+    "lon_west": -66.0,
+    "lon_east": -59.0
+  },
+  "(2, 2)": {
+    "lat_south": -31.0,
+    "lat_north": -34.0,
+    "lon_west": -66.0,
+    "lon_east": -59.0
+  },
+  "(3, 2)": {
+    "lat_south": -26.0,
+    "lat_north": -29.0,
+    "lon_west": -66.0,
+    "lon_east": -59.0
+  },
+  "(4, 2)": {
+    "lat_south": -21.0,
+    "lat_north": -24.0,
+    "lon_west": -66.0,
+    "lon_east": -59.0
+  },
+  "(0, 3)": {
+    "lat_south": -41.0,
+    "lat_north": -44.0,
+    "lon_west": -61.0,
+    "lon_east": -54.0
+  },
+  "(1, 3)": {
+    "lat_south": -36.0,
+    "lat_north": -39.0,
+    "lon_west": -61.0,
+    "lon_east": -54.0
+  },
+  "(2, 3)": {
+    "lat_south": -31.0,
+    "lat_north": -34.0,
+    "lon_west": -61.0,
+    "lon_east": -54.0
+  },
+  "(3, 3)": {
+    "lat_south": -26.0,
+    "lat_north": -29.0,
+    "lon_west": -61.0,
+    "lon_east": -54.0
+  },
+  "(4, 3)": {
+    "lat_south": -21.0,
+    "lat_north": -24.0,
+    "lon_west": -61.0,
+    "lon_east": -54.0
+  },
+  "(0, 4)": {
+    "lat_south": -41.0,
+    "lat_north": -44.0,
+    "lon_west": -56.0,
+    "lon_east": -49.0
+  },
+  "(1, 4)": {
+    "lat_south": -36.0,
+    "lat_north": -39.0,
+    "lon_west": -56.0,
+    "lon_east": -49.0
+  },
+  "(2, 4)": {
+    "lat_south": -31.0,
+    "lat_north": -34.0,
+    "lon_west": -56.0,
+    "lon_east": -49.0
+  },
+  "(3, 4)": {
+    "lat_south": -26.0,
+    "lat_north": -29.0,
+    "lon_west": -56.0,
+    "lon_east": -49.0
+  },
+  "(4, 4)": {
+    "lat_south": -21.0,
+    "lat_north": -24.0,
+    "lon_west": -56.0,
+    "lon_east": -49.0
+  },
+  "(0, 5)": {
+    "lat_south": -41.0,
+    "lat_north": -44.0,
+    "lon_west": -51.0,
+    "lon_east": -44.0
+  },
+  "(1, 5)": {
+    "lat_south": -36.0,
+    "lat_north": -39.0,
+    "lon_west": -51.0,
+    "lon_east": -44.0
+  },
+  "(2, 5)": {
+    "lat_south": -31.0,
+    "lat_north": -34.0,
+    "lon_west": -51.0,
+    "lon_east": -44.0
+  },
+  "(3, 5)": {
+    "lat_south": -26.0,
+    "lat_north": -29.0,
+    "lon_west": -51.0,
+    "lon_east": -44.0
+  },
+  "(4, 5)": {
+    "lat_south": -21.0,
+    "lat_north": -24.0,
+    "lon_west": -51.0,
+    "lon_east": -44.0
+  }
+}
