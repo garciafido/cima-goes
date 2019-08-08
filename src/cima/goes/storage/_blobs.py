@@ -11,7 +11,7 @@ GoesBlob = Union[Blob]
 class BandBlobs:
     product: Product
     band: Band
-    blobs: [GoesBlob]
+    blobs: List[GoesBlob]
 
 
 @dataclass

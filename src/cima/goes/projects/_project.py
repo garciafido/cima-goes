@@ -65,6 +65,7 @@ class BatchProcess(object):
                             minute = int(grouped_blobs.start[9:11])
                             tasks.append(Task(
                                 process, date.year, date.month, date.day, hour, minute,
+                                grouped_blobs.blobs,
                                 *args, **kwargs))
                             # tasks.append(Task(
                             #     _call,
