@@ -14,7 +14,7 @@ class storage_type(Enum):
 
 
 @dataclass
-class storage_info:
+class StorageInfo:
     def __init__(self, stype: storage_type, *args, **kwargs):
         self.stype = stype
         self.args = args if args else ()
@@ -26,7 +26,7 @@ class storage_info:
 
 class Storage(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def get_storage_info(self) -> storage_info:
+    def get_storage_info(self) -> StorageInfo:
         pass
 
     @abc.abstractmethod

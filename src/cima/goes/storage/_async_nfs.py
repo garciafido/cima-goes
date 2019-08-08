@@ -1,6 +1,6 @@
 import aiofiles
 import netCDF4
-from cima.goes.storage._file_systems import Storage, storage_type, storage_info
+from cima.goes.storage._file_systems import Storage, storage_type, StorageInfo
 
 
 class ANFS(Storage):
@@ -10,8 +10,8 @@ class ANFS(Storage):
     def __init__(self):
         self.stype = storage_type.ANFS
 
-    def get_storage_info(self) -> storage_info:
-        return storage_info(storage_type.ANFS)
+    def get_storage_info(self) -> StorageInfo:
+        return StorageInfo(storage_type.ANFS)
 
     async def list(self, path: str):
         raise Exception('Not implemented')

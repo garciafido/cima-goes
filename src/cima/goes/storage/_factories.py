@@ -4,10 +4,10 @@ from cima.goes.storage._async_ftp import AFTP
 from cima.goes.storage._nfs import NFS
 from cima.goes.storage._async_nfs import ANFS
 from cima.goes.storage._gcs import GCS
-from cima.goes.storage._file_systems import Storage, storage_info, storage_type
+from cima.goes.storage._file_systems import Storage, StorageInfo, storage_type
 
 
-def mount_storage(store: storage_info) -> Storage:
+def mount_storage(store: StorageInfo) -> Storage:
     if store.stype == storage_type.FTP:
         return FTP(**store.kwargs)
     if store.stype == storage_type.AFTP:
@@ -21,7 +21,7 @@ def mount_storage(store: storage_info) -> Storage:
     raise Exception(f'{store.stype.value} not implemented')
 
 
-def mount_goes_storage(store: storage_info) -> GoesStorage:
+def mount_goes_storage(store: StorageInfo) -> GoesStorage:
     if store.stype == storage_type.GCS:
         return GCS(**store.kwargs)
     raise Exception(f'{store.stype.value} not implemented')

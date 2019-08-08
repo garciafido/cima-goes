@@ -2,7 +2,7 @@ import os
 import io
 import aioftp
 import netCDF4
-from cima.goes.storage._file_systems import Storage, storage_info, storage_type
+from cima.goes.storage._file_systems import Storage, StorageInfo, storage_type
 
 
 class AFTP(Storage):
@@ -15,8 +15,8 @@ class AFTP(Storage):
         self.password = password
         self.port = port
 
-    def get_storage_info(self) -> storage_info:
-        return storage_info(storage_type.AFTP, host=self.host, port=self.port, user=self.user, password=self.password)
+    def get_storage_info(self) -> StorageInfo:
+        return StorageInfo(storage_type.AFTP, host=self.host, port=self.port, user=self.user, password=self.password)
 
     async def list(self, path: str):
         async with aioftp.ClientSession(self.host, self.port, self.user, self.password) as client:

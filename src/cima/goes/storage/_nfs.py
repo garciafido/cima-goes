@@ -1,5 +1,5 @@
 import netCDF4
-from cima.goes.storage._file_systems import Storage, storage_type, storage_info
+from cima.goes.storage._file_systems import Storage, storage_type, StorageInfo
 
 
 class NFS(Storage):
@@ -12,8 +12,8 @@ class NFS(Storage):
     def list(self, path):
         raise Exception('Not implemented')
 
-    def get_storage_info(self) -> storage_info:
-        return storage_info(storage_type.NFS)
+    def get_storage_info(self) -> StorageInfo:
+        return StorageInfo(storage_type.NFS)
 
     def mkdir(self, path):
         raise Exception('Not implemented')

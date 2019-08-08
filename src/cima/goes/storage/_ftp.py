@@ -2,7 +2,7 @@ import os
 import io
 import ftplib
 import netCDF4
-from cima.goes.storage._file_systems import Storage, storage_info, storage_type
+from cima.goes.storage._file_systems import Storage, StorageInfo, storage_type
 
 
 class FTP(Storage):
@@ -15,8 +15,8 @@ class FTP(Storage):
         self.password = password
         self.port = port
 
-    def get_storage_info(self) -> storage_info:
-        return storage_info(storage_type.FTP, host=self.host, port=self.port, user=self.user, password=self.password)
+    def get_storage_info(self) -> StorageInfo:
+        return StorageInfo(storage_type.FTP, host=self.host, port=self.port, user=self.user, password=self.password)
 
     def list(self, path: str):
         ftp = ftplib.FTP()

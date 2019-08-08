@@ -6,3 +6,4 @@ from cima.goes.storage._gcs import GCS
 from cima.goes.storage._factories import mount_goes_storage, mount_storage
 from cima.goes.storage._blobs import GroupedBandBlobs, GoesBlob, BandBlobs
 from cima.goes.storage._goes_data import GoesStorage
+from cima.goes.storage._file_systems import StorageInfo

@@ -8,7 +8,7 @@ from cima.goes.utils._file_names import ProductBand
 from google.oauth2 import service_account
 from cima.goes.utils._file_names import file_regex_pattern, path_prefix, slice_obs_start, Product
 from cima.goes import Band, ANY_MODE
-from cima.goes.storage._file_systems import Storage, storage_type, storage_info
+from cima.goes.storage._file_systems import Storage, storage_type, StorageInfo
 from cima.goes.storage._blobs import GoesBlob, GroupedBandBlobs, BandBlobs
 from cima.goes.storage._goes_data import GoesStorage
 
@@ -40,12 +40,12 @@ class GCS(GoesStorage):
     #
     # Storage methods
     #
-    def get_storage_info(self) -> storage_info:
-        return storage_info(storage_type.GCS,
-                 credentials_as_dict=self.credentials_as_dict,
-                 bucket=self.bucket,
-                 product=self.product,
-                 credentials_filepath=self.credentials_filepath)
+    def get_storage_info(self) -> StorageInfo:
+        return StorageInfo(storage_type.GCS,
+                           credentials_as_dict=self.credentials_as_dict,
+                           bucket=self.bucket,
+                           product=self.product,
+                           credentials_filepath=self.credentials_filepath)
 
     def list(self, path):
         return self.list_blobs(path)
