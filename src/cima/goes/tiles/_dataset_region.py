@@ -39,7 +39,7 @@ class SatBandKey:
 @dataclass
 class DatasetRegion:
     sat_band_key: SatBandKey
-    lan_lot_area: LatLonRegion
+    region: LatLonRegion
     indexes: RegionIndexes
 
 
@@ -112,7 +112,7 @@ def load_region_data(storage: Storage, filepath) -> RegionData:
 def dataset_region_as_dict(dataset_region: DatasetRegion) -> dict:
     return {
         'sat_band_key': asdict(dataset_region.sat_band_key),
-        'lan_lot_area': asdict(dataset_region.lan_lot_area),
+        'region': asdict(dataset_region.region),
         'indexes': asdict(dataset_region.indexes)
     }
 
@@ -129,7 +129,7 @@ def region_data_from_dict(bands_region_dict: dict) -> RegionData:
     for k, v in bands_region_dict.items():
         bands_region[k] = DatasetRegion(
             sat_band_key=SatBandKey(**v['sat_band_key']),
-            lan_lot_area=LatLonRegion(**v['lan_lot_area']),
+            region=LatLonRegion(**v['region']),
             indexes=RegionIndexes(**v['indexes']),
         )
     return bands_region
@@ -201,13 +201,13 @@ def get_dataset_key(dataset: Dataset) -> SatBandKey:
     )
 
 
-def find_dataset_region(dataset, lat_lon_region: LatLonRegion, major_order=default_major_order) -> DatasetRegion:
+def find_dataset_region(dataset, region: LatLonRegion, major_order=default_major_order) -> DatasetRegion:
     sat_band_key = get_dataset_key(dataset)
     lats, lons = get_lats_lons(dataset)
-    indexes = find_indexes(lat_lon_region, lats, lons, major_order)
+    indexes = find_indexes(region, lats, lons, major_order)
     return DatasetRegion(
         sat_band_key=sat_band_key,
-        lan_lot_area=lat_lon_region,
+        region=region,
         indexes=indexes
     )
 
