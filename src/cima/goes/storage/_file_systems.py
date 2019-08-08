@@ -29,17 +29,17 @@ class Storage(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def list(self, path):
+    def list(self, path: str):
         pass
 
     @abc.abstractmethod
-    def mkdir(self, path):
+    def mkdir(self, path: str):
         pass
 
     @abc.abstractmethod
-    def upload_stream(self, data, filepath):
+    def upload_data(self, data: bytes, filepath: str):
         pass
 
     @abc.abstractmethod
-    def download_stream(self, filepath):
+    def download_data(self, filepath: str) -> bytes:
         pass

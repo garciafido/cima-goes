@@ -50,13 +50,13 @@ class GCS(GoesStorage):
     async def list(self, path):
         return self.list_blobs(path)
 
-    async def download_stream(self, filepath):
+    async def download_data(self, filepath):
         return self.download_as_stream(filepath)
 
     async def mkdir(self, path):
         raise Exception('Not implemented: mkdir')
 
-    async def upload_stream(self, data, filepath):
+    async def upload_data(self, data, filepath):
         raise Exception('Not implemented: upload_stream')
 
     #

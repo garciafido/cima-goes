@@ -13,20 +13,20 @@ class ANFS(Storage):
     def get_storage_info(self) -> storage_info:
         return storage_info(storage_type.ANFS)
 
-    async def list(self, path):
+    async def list(self, path: str):
         raise Exception('Not implemented')
 
-    async def mkdir(self, path):
+    async def mkdir(self, path: str):
         raise Exception('Not implemented')
 
-    async def upload_stream(self, data, filepath):
+    async def upload_data(self, data: bytes, filepath: str):
         async with aiofiles.open(filepath, mode='w+b') as f:
             return await f.write(data)
 
-    async def download_stream(self, filepath):
+    async def download_data(self, filepath: str) -> bytes:
         async with aiofiles.open(filepath, mode='r') as f:
             return await f.read()
 
-    async def download_dataset(self, filepath):
-        data = await self.download_stream(filepath)
+    async def download_dataset(self, filepath: str) -> netCDF4.Dataset:
+        data = await self.download_data(filepath)
         return netCDF4.Dataset("in_memory_file", mode='r', memory=data)

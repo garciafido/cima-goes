@@ -78,7 +78,7 @@ if __name__ == '__main__':
     import json
     from cima.goes.storage import NFS, GCS, GoesStorage
 
-    data = NFS().download_stream('../../../../../_test/credentials.json')
+    data = NFS().download_data('../../../../../_test/credentials.json')
     credentials_as_dict = json.loads(data)
     goes_storage = GCS(credentials_as_dict=credentials_as_dict)
 

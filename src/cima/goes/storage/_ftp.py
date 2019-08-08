@@ -18,7 +18,7 @@ class FTP(Storage):
     def get_storage_info(self) -> storage_info:
         return storage_info(storage_type.FTP, host=self.host, port=self.port, user=self.user, password=self.password)
 
-    def list(self, path):
+    def list(self, path: str):
         ftp = ftplib.FTP()
         try:
             ftp.connect(host=self.host, port=self.port)
@@ -27,7 +27,7 @@ class FTP(Storage):
         finally:
             ftp.close()
 
-    def mkdir(self, path):
+    def mkdir(self, path: str):
         ftp = ftplib.FTP()
         try:
             ftp.connect(host=self.host, port=self.port)
@@ -36,7 +36,7 @@ class FTP(Storage):
         finally:
             ftp.close()
 
-    def upload_stream(self, data, filepath):
+    def upload_data(self, data: bytes, filepath: str):
         ftp = ftplib.FTP()
         try:
             ftp.connect(host=self.host, port=self.port)
@@ -46,11 +46,13 @@ class FTP(Storage):
                 ftp.mkd(path)
             except Exception as e:
                 pass
-            ftp.storbinary('STOR ' + filepath, data)
+            stream = io.BytesIO(data)
+            stream.seek(0)
+            ftp.storbinary('STOR ' + filepath, stream)
         finally:
             ftp.close()
 
-    def download_stream(self, filepath):
+    def download_data(self, filepath: str) -> bytes:
         ftp = ftplib.FTP()
         try:
             ftp.connect(host=self.host, port=self.port)
@@ -62,6 +64,6 @@ class FTP(Storage):
         finally:
             ftp.close()
 
-    def download_dataset(self, filepath):
-        data = self.download_stream(filepath)
+    def download_dataset(self, filepath: str) -> netCDF4.Dataset:
+        data = self.download_data(filepath)
         return netCDF4.Dataset("in_memory_file", mode='r', memory=data)

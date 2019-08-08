@@ -159,11 +159,11 @@ def save_tiles(storage: Storage, filepath: str, band_tiles_dict: BandTilesDict):
     in_memory_file = io.BytesIO()
     in_memory_file.write(data)
     in_memory_file.seek(0)
-    storage.upload_stream(in_memory_file, filepath)
+    storage.upload_data(in_memory_file, filepath)
 
 
 def load_tiles(storage: Storage, filepath) -> BandTilesDict:
-    data = storage.download_stream(filepath)
+    data = storage.download_data(filepath)
     tiles_dict = json.loads(data)
     return get_tiles_from_dict(tiles_dict)
 

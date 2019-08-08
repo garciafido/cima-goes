@@ -18,14 +18,14 @@ class NFS(Storage):
     def mkdir(self, path):
         raise Exception('Not implemented')
 
-    def upload_stream(self, data, filepath):
+    def upload_data(self, data, filepath):
         with open(filepath, mode='w+b') as f:
             f.write(data)
 
-    def download_stream(self, filepath):
+    def download_data(self, filepath):
         with open(filepath, mode='r') as f:
             return f.read()
 
     def download_dataset(self, filepath):
-        data = self.download_stream(filepath)
+        data = self.download_data(filepath)
         return netCDF4.Dataset("in_memory_file", mode='r', memory=data)

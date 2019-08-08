@@ -18,30 +18,30 @@ class AFTP(Storage):
     def get_storage_info(self) -> storage_info:
         return storage_info(storage_type.AFTP, host=self.host, port=self.port, user=self.user, password=self.password)
 
-    async def list(self, path):
+    async def list(self, path: str):
         async with aioftp.ClientSession(self.host, self.port, self.user, self.password) as client:
             return await client.list(path)
 
-    async def mkdir(self, path):
+    async def mkdir(self, path: str):
         async with aioftp.ClientSession(self.host, self.port, self.user, self.password) as client:
             await client.make_directory(path)
 
-    async def upload_stream(self, data, filepath):
+    async def upload_data(self, data: bytes, filepath: str):
         async with aioftp.ClientSession(self.host, self.port, self.user, self.password) as client:
             path = os.path.dirname(os.path.abspath(filepath))
             await client.make_directory(path)
-            async with client.upload_stream(filepath, offset=0) as stream:
+            async with client.upload_data(filepath, offset=0) as stream:
                 await stream.write(data)
 
-    async def download_stream(self, filepath):
+    async def download_data(self, filepath: str) -> bytes:
         async with aioftp.ClientSession(self.host, self.port, self.user, self.password) as client:
-            async with client.download_stream(filepath, offset=0) as stream:
+            async with client.download_data(filepath, offset=0) as stream:
                 in_memory_file = io.BytesIO()
                 async for block in stream.iter_by_block():
                     in_memory_file.write(block)
                 in_memory_file.seek(0)
                 return in_memory_file.read()
 
-    async def download_dataset(self, filepath):
-        data = await self.download_stream(filepath)
+    async def download_dataset(self, filepath: str) -> netCDF4.Dataset:
+        data = await self.download_data(filepath)
         return netCDF4.Dataset("in_memory_file", mode='r', memory=data)

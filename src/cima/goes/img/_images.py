@@ -146,7 +146,7 @@ def save_image(image,
             format = file_extension[1:]
     figure = getfig(image, tile, lats, lons, format=format, cmap=None, vmin=None, vmax=None,
               draw_cultural=draw_cultural, draw_grid=draw_grid, trim_excess=0)
-    storage.upload_stream(figure, filepath)
+    storage.upload_data(figure, filepath)
     figure.seek(0)
     return figure
 
