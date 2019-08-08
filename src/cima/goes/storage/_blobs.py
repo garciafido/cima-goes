@@ -14,7 +14,6 @@ class BandBlobs:
     blobs: [GoesBlob]
 
 
-
 @dataclass
 class GroupedBandBlobs:
     start: str

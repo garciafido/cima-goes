@@ -239,9 +239,7 @@ def get_tiles(region: LatLonRegion,
     tiles = {}
     lat_step = -lat_step
     lats = [x for x in np.arange(region.lat_north, region.lat_south, lat_step)]
-    print(lats)
     lons = [x for x in np.arange(region.lon_west, region.lon_east, lon_step)]
-    print(lons)
     for lat_index, lat in enumerate(lats):
         for lon_index, lon in enumerate(lons):
             tiles[(lat_index, lon_index)] = expand_region(
