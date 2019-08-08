@@ -3,10 +3,8 @@ from dataclasses import dataclass
 from typing import List, Callable, Any
 
 from cima.goes import ProductBand
-from cima.goes.storage import GoesBlob, GoesStorage, GroupedBandBlobs
+from cima.goes.storage import BandBlobs, GoesBlob, GoesStorage, GroupedBandBlobs
 from cima.goes.tiles import RegionData, TilesDict
-
-from build.lib.cima.goes.storage._blobs import BandBlobs
 
 
 @dataclass
