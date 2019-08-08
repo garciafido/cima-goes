@@ -67,8 +67,8 @@ def fill_bands_info(goes_storage: GoesStorage, lat_lon_region: LatLonRegion, reg
         sat_band_key = get_dataset_key(dataset)
         key = band_key_as_string(sat_band_key)
         if key not in region_indexes_dict:
-            lat_lon_region = find_dataset_region(dataset, lat_lon_region)
-            region_indexes_dict[band_key_as_string(lat_lon_region.sat_band_key)] = lat_lon_region
+            dataset_region = find_dataset_region(dataset, lat_lon_region)
+            region_indexes_dict[band_key_as_string(dataset_region.sat_band_key)] = dataset_region
 
 
 def load_tiles(storage: Storage, filepath) -> TilesDict:
@@ -184,7 +184,6 @@ def get_dataset_key(dataset) -> SatBandKey:
 def find_dataset_region(dataset, lat_lon_region: LatLonRegion, major_order=default_major_order) -> DatasetRegion:
     sat_band_key = get_dataset_key(dataset)
     lats, lons = get_lats_lons(dataset)
-    print('lat_lon_region', lat_lon_region)
     indexes = find_indexes(lat_lon_region, lats, lons, major_order)
     return DatasetRegion(
         sat_band_key=sat_band_key,
