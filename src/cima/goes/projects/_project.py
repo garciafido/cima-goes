@@ -28,8 +28,9 @@ class DatesRange:
 ProcessCall = Callable[[GoesStorage, int, int, int, int, int, List[BandBlobs], List[Any], Dict[str, Any]], Any]
 
 
-def _call(storage_info: StorageInfo, process: ProcessCall, year, month, day, hour, minute, blobs, *args, **kwargs):
+def _call(storage_info: StorageInfo, process: ProcessCall, year, month, day, hour, minute, blob_names, *args, **kwargs):
     goes_storage = mount_goes_storage(storage_info)
+    blobs = [goes_storage.bucket.blob(name) for name in blob_names]
     process(goes_storage,
             year, month, day, hour, minute, blobs,
             *args, **kwargs)
