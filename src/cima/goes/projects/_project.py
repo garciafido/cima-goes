@@ -63,11 +63,12 @@ class BatchProcess(object):
                         tasks = []
                         for grouped_blobs in grouped_blobs_list:
                             minute = int(grouped_blobs.start[9:11])
-                            tasks.append(Task(
-                                _call,
-                                self.goes_storage.get_storage_info(),
-                                process,
-                                date.year, date.month, date.day, hour, minute, grouped_blobs.blobs,
-                                *args, **kwargs
-                            ))
+                            tasks.append(process)
+                            # tasks.append(Task(
+                            #     _call,
+                            #     self.goes_storage.get_storage_info(),
+                            #     process,
+                            #     date.year, date.month, date.day, hour, minute, grouped_blobs.blobs,
+                            #     *args, **kwargs
+                            # ))
                         run_concurrent(tasks, workers)
