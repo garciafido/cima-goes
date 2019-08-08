@@ -28,6 +28,13 @@ class DatesRange:
 ProcessCall = Callable[[GoesStorage, int, int, int, int, int, List[BandBlobs], List[Any], Dict[str, Any]], Any]
 
 
+def _call(storage_info: StorageInfo, process: ProcessCall, year, month, day, hour, minute, blobs, *args, **kwargs):
+    goes_storage = mount_goes_storage(storage_info)
+    process(goes_storage,
+            year, month, day, hour, minute, blobs,
+            *args, **kwargs)
+
+
 class BatchProcess(object):
     def __init__(self,
                  goes_storage: GoesStorage,
@@ -37,13 +44,6 @@ class BatchProcess(object):
         self.bands = bands
         self.date_ranges = date_ranges
         self.goes_storage = goes_storage
-
-    @staticmethod
-    def _call(storage_info: StorageInfo, process: ProcessCall, year, month, day, hour, minute, blobs, *args, **kwargs):
-        goes_storage = mount_goes_storage(storage_info)
-        process(goes_storage,
-                year, month, day, hour, minute, blobs,
-                *args, **kwargs)
 
     def run(self, process: ProcessCall, workers=2, *args, **kwargs):
         def dates_range(date_range: DatesRange):
@@ -64,7 +64,7 @@ class BatchProcess(object):
                         for grouped_blobs in grouped_blobs_list:
                             minute = int(grouped_blobs.start[9:11])
                             tasks.append(Task(
-                                self._call,
+                                _call,
                                 self.goes_storage.get_storage_info(),
                                 process,
                                 date.year, date.month, date.day, hour, minute, grouped_blobs.blobs,
