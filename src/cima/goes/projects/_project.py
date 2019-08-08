@@ -63,7 +63,9 @@ class BatchProcess(object):
                         tasks = []
                         for grouped_blobs in grouped_blobs_list:
                             minute = int(grouped_blobs.start[9:11])
-                            tasks.append(Task(process))
+                            tasks.append(Task(
+                                process, date.year, date.month, date.day, hour, minute,
+                                *args, **kwargs))
                             # tasks.append(Task(
                             #     _call,
                             #     self.goes_storage.get_storage_info(),
