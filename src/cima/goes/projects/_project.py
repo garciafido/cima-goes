@@ -6,6 +6,7 @@ from cima.goes import ProductBand
 from cima.goes.storage import BandBlobs, GoesBlob, GoesStorage, GroupedBandBlobs, mount_goes_storage
 from cima.goes.storage import StorageInfo
 from cima.goes.storage import mount_storage
+from cima.goes.tasks import run_concurrent, Task
 
 
 @dataclass
@@ -26,6 +27,7 @@ class DatesRange:
 
 ProcessCall = Callable[[GoesStorage, int, int, int, int, int, List[BandBlobs], List[Any], Dict[str, Any]], Any]
 
+
 class BatchProcess(object):
     def __init__(self,
                  goes_storage: GoesStorage,
@@ -43,7 +45,7 @@ class BatchProcess(object):
                 year, month, day, hour, minute, blobs,
                 *args, **kwargs)
 
-    def run(self, process: ProcessCall, *args, **kwargs):
+    def run(self, process: ProcessCall, workers=2, *args, **kwargs):
         def dates_range(date_range: DatesRange):
             current_date = date_range.from_date
             last_date = date_range.to_date
@@ -58,9 +60,14 @@ class BatchProcess(object):
                         grouped_blobs_list = self.goes_storage.grouped_one_hour_blobs(
                             date.year, date.month, date.day, hour,
                             self.bands)
+                        tasks = []
                         for grouped_blobs in grouped_blobs_list:
                             minute = int(grouped_blobs.start[9:11])
-                            self._call(self.goes_storage.get_storage_info(),
-                                       process,
-                                       date.year, date.month, date.day, hour, minute, grouped_blobs.blobs,
-                                       *args, **kwargs)
+                            tasks.append(Task(
+                                self._call,
+                                self.goes_storage.get_storage_info(),
+                                process,
+                                date.year, date.month, date.day, hour, minute, grouped_blobs.blobs,
+                                *args, **kwargs
+                            ))
+                        run_concurrent(tasks, workers)
