@@ -35,7 +35,7 @@ class BatchProcess(object):
         self.goes_storage = goes_storage
         self.process_minute_blobs = process_minute_blobs
 
-    def run(self, *args, kwargs):
+    def run(self, *args, **kwargs):
         def dates_range(date_range: DatesRange):
             current_date = date_range.from_date
             last_date = date_range.to_date
