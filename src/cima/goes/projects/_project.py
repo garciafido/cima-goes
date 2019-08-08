@@ -66,7 +66,7 @@ class BatchProcess(object):
                             tasks.append(Task(
                                 process,
                                 self.goes_storage.get_storage_info(),
-                                [b.blobs[0].name for b in grouped_blobs.blobs],
+                                [b.blobs[0] for b in grouped_blobs.blobs],
                                 date.year, date.month, date.day, hour, minute,
                                 *args, **kwargs))
                             # tasks.append(Task(
