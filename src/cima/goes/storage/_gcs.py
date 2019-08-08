@@ -47,16 +47,22 @@ class GCS(GoesStorage):
                  product=self.product,
                  credentials_filepath=self.credentials_filepath)
 
-    async def list(self, path):
+    def list(self, path):
         return self.list_blobs(path)
 
-    async def download_data(self, filepath):
+    def download_data(self, filepath):
         return self.download_as_stream(filepath)
 
-    async def mkdir(self, path):
+    def download_stream(self, filepath: str):
+        return self.download_as_stream(filepath)
+
+    def mkdir(self, path):
         raise Exception('Not implemented: mkdir')
 
-    async def upload_data(self, data, filepath):
+    def upload_data(self, data, filepath):
+        raise Exception('Not implemented: upload_data')
+
+    def upload_stream(self, stream: io.BytesIO, filepath: str):
         raise Exception('Not implemented: upload_stream')
 
     #

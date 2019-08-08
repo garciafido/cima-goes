@@ -37,6 +37,11 @@ class FTP(Storage):
             ftp.close()
 
     def upload_data(self, data: bytes, filepath: str):
+        stream = io.BytesIO(data)
+        stream.seek(0)
+        self.upload_stream(stream, filepath)
+
+    def upload_stream(self, stream: io.BytesIO, filepath: str):
         ftp = ftplib.FTP()
         try:
             ftp.connect(host=self.host, port=self.port)
@@ -46,13 +51,16 @@ class FTP(Storage):
                 ftp.mkd(path)
             except Exception as e:
                 pass
-            stream = io.BytesIO(data)
             stream.seek(0)
             ftp.storbinary('STOR ' + filepath, stream)
         finally:
             ftp.close()
 
     def download_data(self, filepath: str) -> bytes:
+        stream = self.download_stream(filepath)
+        return stream.read()
+
+    def download_stream(self, filepath: str) -> io.BytesIO:
         ftp = ftplib.FTP()
         try:
             ftp.connect(host=self.host, port=self.port)
@@ -60,7 +68,7 @@ class FTP(Storage):
             in_memory_file = io.BytesIO()
             ftp.retrbinary('RETR ' + filepath, lambda block: in_memory_file.write(block))
             in_memory_file.seek(0)
-            return in_memory_file.read()
+            return in_memory_file
         finally:
             ftp.close()
 

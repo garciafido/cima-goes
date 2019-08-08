@@ -26,21 +26,29 @@ class AFTP(Storage):
         async with aioftp.ClientSession(self.host, self.port, self.user, self.password) as client:
             await client.make_directory(path)
 
-    async def upload_data(self, data: bytes, filepath: str):
+    async def upload_stream(self, data: io.BytesIO, filepath: str):
         async with aioftp.ClientSession(self.host, self.port, self.user, self.password) as client:
             path = os.path.dirname(os.path.abspath(filepath))
             await client.make_directory(path)
-            async with client.upload_data(filepath, offset=0) as stream:
+            async with client.upload_stream(filepath, offset=0) as stream:
                 await stream.write(data)
 
+    async def upload_data(self, data: bytes, filepath: str):
+        in_memory = io.BytesIO(data)
+        await self.upload_stream(in_memory, filepath)
+
     async def download_data(self, filepath: str) -> bytes:
+        stream = await self.download_stream(filepath)
+        return stream.read()
+
+    async def download_stream(self, filepath: str) -> io.BytesIO:
         async with aioftp.ClientSession(self.host, self.port, self.user, self.password) as client:
             async with client.download_data(filepath, offset=0) as stream:
                 in_memory_file = io.BytesIO()
                 async for block in stream.iter_by_block():
                     in_memory_file.write(block)
                 in_memory_file.seek(0)
-                return in_memory_file.read()
+                return in_memory_file
 
     async def download_dataset(self, filepath: str) -> netCDF4.Dataset:
         data = await self.download_data(filepath)

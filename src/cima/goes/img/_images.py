@@ -7,7 +7,7 @@ import cartopy
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 from cima.goes.storage._file_systems import Storage
-from cima.goes.tiles import Tile, get_tile_extent
+from cima.goes.tiles import DatasetRegion, LatLonRegion, get_tile_extent
 from cima.goes.utils.load_cpt import load_cpt
 from matplotlib.axes import Axes
 
@@ -20,7 +20,7 @@ def _resize(image, new_size):
 
 
 def compose_rgb(dataset_red, dataset_veggie, dataset_blue,
-                tile_red: Tile, tile_veggie: Tile, tile_blue: Tile):
+                tile_red: DatasetRegion, tile_veggie: DatasetRegion, tile_blue: DatasetRegion):
     def gamma_correction(image):
         # Apply range limits for each channel. RGB values must be between 0 and 1
         image = np.clip(image, 0, 1)
@@ -112,8 +112,8 @@ def pcolormesh(ax: Axes, image, lons, lats, cmap=None, vmin=None, vmax=None):
         ax.pcolormesh(lons, lats, image, cmap=cmap, vmin=vmin, vmax=vmax)
 
 
-def set_extent(ax: Axes, tile: Tile, trim_excess=0):
-    extent = get_tile_extent(tile, trim_excess=trim_excess)
+def set_extent(ax: Axes, lonlat_region: LatLonRegion, trim_excess=0):
+    extent = get_tile_extent(lonlat_region, trim_excess=trim_excess)
     ax.set_extent(extent, crs=ccrs.PlateCarree())
 
 
@@ -133,7 +133,7 @@ def get_image_inches(image):
 def save_image(image,
                storage: Storage,
                filepath: str,
-               tile: Tile,
+               lonlat_region: LatLonRegion,
                lats, lons,
                format=None,
                cmap=None, vmin=None, vmax=None,
@@ -144,15 +144,15 @@ def save_image(image,
         _, file_extension = os.path.splitext(filepath)
         if file_extension[0] == '.':
             format = file_extension[1:]
-    figure = getfig(image, tile, lats, lons, format=format, cmap=None, vmin=None, vmax=None,
-              draw_cultural=draw_cultural, draw_grid=draw_grid, trim_excess=0)
+    figure = getfig(image, lonlat_region, lats, lons, format=format, cmap=cmap, vmin=vmin, vmax=vmax,
+                    draw_cultural=draw_cultural, draw_grid=draw_grid, trim_excess=0)
     storage.upload_data(figure, filepath)
     figure.seek(0)
     return figure
 
 
 def getfig(image,
-           tile: Tile,
+           lonlat_region: LatLonRegion,
            lats, lons,
            format='png',
            cmap=None, vmin=None, vmax=None,
@@ -164,7 +164,7 @@ def getfig(image,
         fig.set_size_inches(image_inches.x, image_inches.y)
         ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
         ax.set_axis_off()
-        set_extent(ax, tile, trim_excess)
+        set_extent(ax, lonlat_region, trim_excess)
         if draw_cultural:
             add_cultural(ax)
         if draw_grid:

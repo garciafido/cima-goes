@@ -1,4 +1,5 @@
 import abc
+import io
 from enum import Enum
 from typing import Dict, Tuple
 from dataclasses import dataclass
@@ -41,5 +42,14 @@ class Storage(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
+    def upload_stream(self, stream: io.BytesIO, filepath: str):
+        pass
+
+    @abc.abstractmethod
     def download_data(self, filepath: str) -> bytes:
         pass
+
+    @abc.abstractmethod
+    def download_stream(self, filepath: str) -> io.BytesIO:
+        pass
+

@@ -46,6 +46,16 @@ TilesDict = Dict[Tuple[int, int], LatLonRegion]
 RegionData = Dict[str, DatasetRegion]
 
 
+def get_tile_extent(region: LatLonRegion, trim_excess=0) -> tuple:
+    # (left, right, bottom, top)
+    return (
+        region.lon_west + trim_excess,
+        region.lon_east - trim_excess,
+        region.lat_south + trim_excess,
+        region.lat_north - trim_excess
+    )
+
+
 def generate_region_data(goes_storage, lat_lon_region: LatLonRegion, bands: List[ProductBand]) -> RegionData:
     region_indexes_dict: RegionData = {}
     fill_bands_info(goes_storage, lat_lon_region, region_indexes_dict, bands, 2017, 8, 1, 12)
