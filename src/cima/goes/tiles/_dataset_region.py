@@ -177,6 +177,10 @@ def get_lats_lons(dataset, indexes: RegionIndexes = None):
     return np.array(lats), np.array(lons)
 
 
+def get_data(dataset, indexes: RegionIndexes, variable: str = 'CMI'):
+    return dataset.variables[variable][indexes.y_min : indexes.y_max, indexes.x_min : indexes.x_max]
+
+
 def get_dataset_key(dataset) -> SatBandKey:
     imager_projection = dataset['goes_imager_projection']
     sat_height = imager_projection.perspective_point_height
