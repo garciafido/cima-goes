@@ -152,7 +152,7 @@ def save_image(image,
 
 
 def getfig(image,
-           lonlat_region: LatLonRegion,
+           region: LatLonRegion,
            lats, lons,
            format='png',
            cmap=None, vmin=None, vmax=None,
@@ -164,7 +164,7 @@ def getfig(image,
         fig.set_size_inches(image_inches.x, image_inches.y)
         ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
         ax.set_axis_off()
-        set_extent(ax, lonlat_region, trim_excess)
+        set_extent(ax, region, trim_excess)
         if draw_cultural:
             add_cultural(ax)
         if draw_grid:
