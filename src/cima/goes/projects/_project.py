@@ -43,14 +43,13 @@ def process_day(process, storage_info, bands, date, date_range, args, kwargs):
         grouped_blobs_list = goes_storage.grouped_one_day_blobs(
             date.year, date.month, date.day, hours,
             bands)
-        print(grouped_blobs_list)
         for grouped_blobs in grouped_blobs_list:
             minute = int(grouped_blobs.start[9:11])
             hour = int(grouped_blobs.start[7:9])
             process(
                 goes_storage,
                 date.year, date.month, date.day, hour, minute,
-                grouped_blobs,
+                grouped_blobs.blobs,
                 *args, **kwargs
             )
 

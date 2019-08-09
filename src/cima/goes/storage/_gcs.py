@@ -181,7 +181,6 @@ class GCS(GoesStorage):
         self.credentials = service_account.Credentials.from_service_account_info(credentials_as_dict)
 
     def _list_blobs(self, path: str, gcs_patterns, delimiter='/') -> List[GoesBlob]:
-        print(gcs_patterns)
         blobs = self.list_blobs(path, delimiter=delimiter)
         result = []
         if gcs_patterns is None or len(gcs_patterns) == 0:
