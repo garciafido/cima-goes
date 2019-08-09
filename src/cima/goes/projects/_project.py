@@ -1,6 +1,6 @@
 import datetime
 from dataclasses import dataclass
-from typing import List, Callable, Any, Dict, Tuple
+from typing import List, Callable, Any, Dict, Tuple, Union
 
 from cima.goes import ProductBand, Product, Band
 from cima.goes.storage import BandBlobs, GoesBlob, GoesStorage, GroupedBandBlobs, mount_goes_storage
@@ -28,8 +28,13 @@ class DatesRange:
 ProcessCall = Callable[[GoesStorage, int, int, int, int, int, Dict[Tuple[Product, Band], GoesBlob], List[Any], Dict[str, Any]], Any]
 
 
-def process_day(process, goes_storage, bands, date, date_range, args, kwargs):
-    if not isinstance(goes_storage, StorageInfo):
+def process_day(process: ProcessCall,
+                goes_storage: Union[StorageInfo, GoesStorage],
+                bands: List[ProductBand],
+                date: datetime.date,
+                date_range: DatesRange,
+                args, kwargs):
+    if isinstance(goes_storage, StorageInfo):
         goes_storage = mount_goes_storage(goes_storage)
     results = []
     for hour_range in date_range.hours_ranges:
