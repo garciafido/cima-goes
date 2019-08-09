@@ -81,16 +81,34 @@ def path_prefix(year: int, month: int, day: int, hour: int, product=Product.CMIP
     return f'{product.value}/{year:04d}/{day_of_year:03d}/{hour:02d}/'
 
 
+def day_path_prefix(year: int, month: int, day: int, product=Product.CMIPF):
+    day_of_year = get_day_of_year(year, month, day)
+    return f'{product.value}/{year:04d}/{day_of_year:03d}/'
+
+
 def file_name(band: Band, product=Product.CMIPF, mode=ANY_MODE):
     return f'{OR}_{product.value}-{mode}C{band:02d}_{G16}'
+
+
+def hour_file_name(hour:int, band: Band, product=Product.CMIPF, mode=ANY_MODE):
+    return f'{hour:02d}/{OR}_{product.value}-{mode}C{band:02d}_{G16}'
 
 
 def file_regex_pattern(band: Band, product: Product = Product.CMIPF, mode: str = ANY_MODE):
     return re.compile(file_name(band, product, mode))
 
 
+def hour_file_regex_pattern(hour: int, band: Band, product: Product = Product.CMIPF, mode: str = ANY_MODE):
+    return re.compile(hour_file_name(hour, band, product, mode))
+
+
 def slice_obs_start(product=Product.CMIPF):
     prefix_pos = len(path_prefix(year=1111, month=1, day=1, hour=11, product=product)) + len(
         file_name(band=Band.RED, product=product)) + 2
     return slice(prefix_pos, prefix_pos + len('20183650045364'))
+
+
+def slice_obs_hour(product=Product.CMIPF):
+    prefix_hour_pos = len(path_prefix(year=1111, month=1, day=1, hour=11, product=product))[-3:-1]
+    return slice(prefix_hour_pos, prefix_hour_pos + 2)
 
