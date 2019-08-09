@@ -42,10 +42,10 @@ class FTP(Storage):
             ftp.cwd('/')
         for part in parts:
             try:
-                print(ftp.cwd(part))
+                ftp.cwd(part)
             except Exception as e:
-                print('mkdir', ftp.mkd(part))
-                print(ftp.cwd(part))
+                ftp.mkd(part)
+                ftp.cwd(part)
 
     def upload_data(self, data: bytes, filepath: str, override: bool = True):
         ftp = ftplib.FTP()
@@ -56,7 +56,6 @@ class FTP(Storage):
             try:
                 self.try_create_path(ftp, path)
             except Exception as e:
-                print(e)
                 pass
             if override:
                 try:
