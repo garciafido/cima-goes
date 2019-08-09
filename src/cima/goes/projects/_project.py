@@ -34,8 +34,8 @@ def process_day(process: ProcessCall,
                 bands: List[ProductBand],
                 date: datetime.date,
                 date_range: DatesRange,
+                storage: Storage,
                 *args,
-                storage: Storage=None,
                 **kwargs):
     if isinstance(goes_storage, StorageInfo):
         goes_storage = mount_goes_storage(goes_storage)
@@ -54,8 +54,8 @@ def process_day(process: ProcessCall,
                 goes_storage,
                 date.year, date.month, date.day, hour, minute,
                 {(bb.product, bb.band): bb.blobs[0] for bb in grouped_blobs.blobs},
+                storage,
                 *args,
-                storage=storage,
                 **kwargs
             )
             if result is not None:
@@ -95,8 +95,8 @@ class BatchProcess(object):
                             self.bands,
                             date,
                             date_range,
+                            None if self.storage is None else self.storage.get_storage_info(),
                             *args,
-                            storage=None if self.storage is None else self.storage.get_storage_info(),
                             **kwargs)
                     )
                 return run_concurrent(tasks, workers)
@@ -109,8 +109,8 @@ class BatchProcess(object):
                         self.bands,
                         date,
                         date_range,
+                        self.storage,
                         *args,
-                        storage=self.storage,
                         **kwargs
                     )
                     if result is not None:
