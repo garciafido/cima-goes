@@ -81,11 +81,10 @@ class BatchProcess(object):
                 yield current_date
                 current_date = current_date + datetime.timedelta(days=1)
 
-        range_results = {}
+        tasks = []
+        results = []
         for date_range in self.date_ranges:
-            range_results[date_range] = []
             if workers > 1:
-                tasks = []
                 for date in dates_range(date_range):
                     tasks.append(
                         Task(
@@ -99,9 +98,7 @@ class BatchProcess(object):
                             storage=None if storage is None else storage.get_storage_info(),
                             **kwargs)
                     )
-                range_results[date_range].append(run_concurrent(tasks, workers))
             else:
-                results = []
                 for date in dates_range(date_range):
                     result = process_day(
                         process,
@@ -115,6 +112,7 @@ class BatchProcess(object):
                     )
                     if result is not None:
                         results.append(result)
-                range_results[date_range].append(results)
 
-        return range_results
+        if tasks:
+            return run_concurrent(tasks, workers)
+        return results
