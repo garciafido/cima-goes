@@ -183,13 +183,13 @@ class GCS(GoesStorage):
         print('entra con', path)
         print(gcs_patterns)
         blobs = self.list_blobs(path)
-        print('LEN', len(blobs))
         result = []
         if gcs_patterns is None or len(gcs_patterns) == 0:
             for blob in blobs:
                 result.append(blob)
         else:
             for blob in blobs:
+                print(blob.name)
                 for pattern in gcs_patterns:
                     if pattern.search(blob.name):
                         result.append(blob)
