@@ -35,13 +35,13 @@ def process_day(process: ProcessCall,
                 date: datetime.date,
                 date_range: DatesRange,
                 *args,
-                storage: Storage = None,
+                # storage: Storage = None,
                 **kwargs):
     if isinstance(goes_storage, StorageInfo):
         goes_storage = mount_goes_storage(goes_storage)
-    if isinstance(storage, StorageInfo):
-        storage = mount_storage(storage)
-    kwargs['storage'] = storage
+    # if isinstance(storage, StorageInfo):
+    #     storage = mount_storage(storage)
+    # kwargs['storage'] = storage
     results = []
     for hour_range in date_range.hours_ranges:
         hours = [hour for hour in range(hour_range.from_hour, hour_range.to_hour + 1)]
@@ -73,7 +73,7 @@ class BatchProcess(object):
         self.date_ranges = date_ranges
         self.goes_storage = goes_storage
 
-    def run(self, process: ProcessCall, *args, workers=2, storage=None, **kwargs):
+    def run(self, process: ProcessCall, *args, workers=2, **kwargs):
         def dates_range(date_range: DatesRange):
             current_date = date_range.from_date
             last_date = date_range.to_date
@@ -94,7 +94,7 @@ class BatchProcess(object):
                             date,
                             date_range,
                             *args,
-                            storage=None if storage is None else storage.get_storage_info(),
+                            # storage=None if storage is None else storage.get_storage_info(),
                             **kwargs)
                     )
                 return run_concurrent(tasks, workers)
@@ -108,7 +108,7 @@ class BatchProcess(object):
                         date,
                         date_range,
                         *args,
-                        storage=storage,
+                        # storage=storage,
                         **kwargs
                     )
                     if result is not None:
