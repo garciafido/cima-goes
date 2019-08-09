@@ -49,7 +49,7 @@ def process_day(process, storage_info, bands, date, date_range, args, kwargs):
             process(
                 goes_storage,
                 date.year, date.month, date.day, hour, minute,
-                grouped_blobs.blobs,
+                [(bb.product, bb.band, bb.blobs[0]) for bb in grouped_blobs.blobs],
                 *args, **kwargs
             )
 
