@@ -6,6 +6,7 @@ from cima.goes import ProductBand, Product, Band
 from cima.goes.storage import BandBlobs, GoesBlob, GoesStorage, GroupedBandBlobs, mount_goes_storage
 from cima.goes.storage import StorageInfo
 from cima.goes.storage import mount_storage
+from cima.goes.storage._file_systems import Storage
 from cima.goes.tasks import run_concurrent, Task
 
 
@@ -33,9 +34,12 @@ def process_day(process: ProcessCall,
                 bands: List[ProductBand],
                 date: datetime.date,
                 date_range: DatesRange,
-                args, kwargs):
+                *args,
+                **kwargs):
     if isinstance(goes_storage, StorageInfo):
         goes_storage = mount_goes_storage(goes_storage)
+    if 'storage' in kwargs and isinstance(goes_storage, StorageInfo):
+        storage = mount_storage(kwargs['storage'])
     results = []
     for hour_range in date_range.hours_ranges:
         hours = [hour for hour in range(hour_range.from_hour, hour_range.to_hour + 1)]
@@ -61,10 +65,12 @@ class BatchProcess(object):
                  goes_storage: GoesStorage,
                  bands: List[ProductBand],
                  date_ranges: List[DatesRange],
+                 storage: Storage = None,
                  ):
         self.bands = bands
         self.date_ranges = date_ranges
         self.goes_storage = goes_storage
+        self.storage = storage
 
     def run(self, process: ProcessCall, workers=2, *args, **kwargs):
         def dates_range(date_range: DatesRange):
@@ -86,7 +92,9 @@ class BatchProcess(object):
                             self.bands,
                             date,
                             date_range,
-                            args, kwargs)
+                            *args,
+                            storage=self.storage if self.storage is not None else self.storage.get_storage_info(),
+                            **kwargs)
                     )
                 return run_concurrent(tasks, workers)
             else:
@@ -98,7 +106,9 @@ class BatchProcess(object):
                         self.bands,
                         date,
                         date_range,
-                        args, kwargs
+                        *args,
+                        storage=self.storage,
+                        **kwargs
                     )
                     if result is not None:
                         results.append(result)
