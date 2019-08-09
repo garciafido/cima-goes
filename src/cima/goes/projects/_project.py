@@ -113,5 +113,5 @@ class BatchProcess(object):
                         date_range,
                         args, kwargs)
                 )
-            run_concurrent(tasks, workers)
+            return run_concurrent(tasks, workers)
 
