@@ -38,6 +38,7 @@ class FTP(Storage):
 
     def try_cwd_path(self, ftp, path):
         parts = path.split('/')
+        ftp.cwd('/')
         for part in parts:
             try:
                 ftp.cwd(part)
