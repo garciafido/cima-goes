@@ -181,7 +181,6 @@ class GCS(GoesStorage):
         self.credentials = service_account.Credentials.from_service_account_info(credentials_as_dict)
 
     def _list_blobs(self, path: str, gcs_patterns, delimiter='/') -> List[GoesBlob]:
-        print('entra con', path)
         print(gcs_patterns)
         blobs = self.list_blobs(path, delimiter=delimiter)
         result = []
@@ -190,7 +189,6 @@ class GCS(GoesStorage):
                 result.append(blob)
         else:
             for blob in blobs:
-                print(blob.name)
                 for pattern in gcs_patterns:
                     if pattern.search(blob.name):
                         result.append(blob)
