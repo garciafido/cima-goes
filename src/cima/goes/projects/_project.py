@@ -41,7 +41,8 @@ def process_day(process: ProcessCall,
         goes_storage = mount_goes_storage(goes_storage)
     if isinstance(storage, StorageInfo):
         storage = mount_storage(storage)
-    kwargs['storage'] = storage
+    if storage is not None:
+        kwargs['storage'] = storage
     results = []
     for hour_range in date_range.hours_ranges:
         hours = [hour for hour in range(hour_range.from_hour, hour_range.to_hour + 1)]
