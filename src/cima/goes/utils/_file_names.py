@@ -106,9 +106,3 @@ def slice_obs_start(product=Product.CMIPF):
     prefix_pos = len(path_prefix(year=1111, month=1, day=1, hour=11, product=product)) + len(
         file_name(band=Band.RED, product=product)) + 2
     return slice(prefix_pos, prefix_pos + len('20183650045364'))
-
-
-def slice_obs_hour(product=Product.CMIPF):
-    prefix_hour_pos = len(path_prefix(year=1111, month=1, day=1, hour=11, product=product))[-3:-1]
-    return slice(prefix_hour_pos, prefix_hour_pos + 2)
-

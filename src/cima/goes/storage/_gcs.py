@@ -6,7 +6,7 @@ from typing import List, Dict, Tuple
 import google.cloud.storage as gcs
 from cima.goes.utils._file_names import ProductBand
 from google.oauth2 import service_account
-from cima.goes.utils._file_names import file_regex_pattern, path_prefix, slice_obs_start, slice_obs_hour, Product
+from cima.goes.utils._file_names import file_regex_pattern, path_prefix, slice_obs_start, Product
 from cima.goes.utils._file_names import day_path_prefix, hour_file_regex_pattern
 from cima.goes import Band, ANY_MODE
 from cima.goes.storage._file_systems import Storage, storage_type, StorageInfo
@@ -140,9 +140,7 @@ class GCS(GoesStorage):
         blobs_by_start: Dict[str, Dict[Tuple[Product, Band], List[GoesBlob]]] = {}
         for band_blobs in band_blobs_list:
             for blob in band_blobs.blobs:
-                hour_key = blob.name[slice_obs_hour(product=self.product)]
-                start_key = blob.name[slice_obs_start(product=self.product)]
-                key = f'{hour_key}:{start_key[9:11]}'
+                key = blob.name[slice_obs_start(product=self.product)]
                 if key not in blobs_by_start:
                     blobs_by_start[key] = {(band_blobs.product, band_blobs.band): [blob]}
                 else:

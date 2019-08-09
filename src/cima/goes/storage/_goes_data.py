@@ -16,6 +16,14 @@ class GoesStorage(Storage):
         pass
 
     @abc.abstractmethod
+    def grouped_one_day_blobs(self, year: int, month: int, day: int, hours: List[int], bands: List[ProductBand]) -> List[GroupedBandBlobs]:
+        pass
+
+    @abc.abstractmethod
+    def one_day_blobs(self, year: int, month: int, day: int, hours: List[int], product_band: ProductBand) -> BandBlobs:
+        pass
+
+    @abc.abstractmethod
     def get_blob(self, name: str) -> GoesBlob:
         pass
 
