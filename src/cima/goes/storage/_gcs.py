@@ -86,7 +86,6 @@ class GCS(GoesStorage):
 
     def grouped_one_day_blobs(self, year: int, month: int, day: int, hours: List[int], product_bands: List[ProductBand]) -> List[GroupedBandBlobs]:
         band_blobs_list: List[BandBlobs] = []
-        print('day_band_blobs')
         for product_band in product_bands:
             blobs = self.day_band_blobs(year, month, day, hours, product_band)
             band_blobs_list.append(BandBlobs(product_band.product, product_band.band, blobs))
@@ -132,8 +131,6 @@ class GCS(GoesStorage):
         )
 
     def day_band_blobs(self, year: int, month: int, day: int, hours: List[int], product_band: ProductBand) -> List[GoesBlob]:
-        print('entra con')
-        print(day_path_prefix(year=year, month=month, day=day, product=product_band.product), hours)
         return self._list_blobs(
             day_path_prefix(year=year, month=month, day=day, product=product_band.product),
             [hour_file_regex_pattern(hour=hour, band=product_band.band, product=product_band.product, mode=self.mode) for hour in hours]
@@ -183,6 +180,8 @@ class GCS(GoesStorage):
         self.credentials = service_account.Credentials.from_service_account_info(credentials_as_dict)
 
     def _list_blobs(self, path: str, gcs_patterns) -> List[GoesBlob]:
+        print('entra con', path)
+        print(gcs_patterns)
         blobs = self.list_blobs(path)
         result = []
         if gcs_patterns is None or len(gcs_patterns) == 0:
