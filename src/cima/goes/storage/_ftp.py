@@ -54,7 +54,7 @@ class FTP(Storage):
             ftp.login(user=self.user, passwd=self.password)
             path = os.path.dirname(os.path.abspath(filepath))
             try:
-                self.create_path(ftp, path)
+                self.try_create_path(ftp, path)
             except Exception as e:
                 print(e)
                 pass
