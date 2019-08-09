@@ -51,7 +51,8 @@ def process_day(process: ProcessCall,
                 {(bb.product, bb.band): bb.blobs[0] for bb in grouped_blobs.blobs},
                 *args, **kwargs
             )
-            results.append(result)
+            if result is not None:
+                results.append(result)
     return results
 
 
@@ -99,7 +100,8 @@ class BatchProcess(object):
                         date_range,
                         args, kwargs
                     )
-                    results.append(result)
+                    if result is not None:
+                        results.append(result)
                 return results
 
 
