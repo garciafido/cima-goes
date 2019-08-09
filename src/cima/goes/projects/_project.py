@@ -34,13 +34,14 @@ def process_day(process: ProcessCall,
                 bands: List[ProductBand],
                 date: datetime.date,
                 date_range: DatesRange,
-                storage: Storage,
                 *args,
+                storage: Storage = None,
                 **kwargs):
     if isinstance(goes_storage, StorageInfo):
         goes_storage = mount_goes_storage(goes_storage)
     if isinstance(storage, StorageInfo):
         storage = mount_storage(storage)
+    kwargs['storage'] = storage
     results = []
     for hour_range in date_range.hours_ranges:
         hours = [hour for hour in range(hour_range.from_hour, hour_range.to_hour + 1)]
@@ -54,7 +55,6 @@ def process_day(process: ProcessCall,
                 goes_storage,
                 date.year, date.month, date.day, hour, minute,
                 {(bb.product, bb.band): bb.blobs[0] for bb in grouped_blobs.blobs},
-                storage,
                 *args,
                 **kwargs
             )
@@ -68,14 +68,12 @@ class BatchProcess(object):
                  goes_storage: GoesStorage,
                  bands: List[ProductBand],
                  date_ranges: List[DatesRange],
-                 storage: Storage = None,
                  ):
         self.bands = bands
         self.date_ranges = date_ranges
         self.goes_storage = goes_storage
-        self.storage = storage
 
-    def run(self, process: ProcessCall, workers=2, *args, **kwargs):
+    def run(self, process: ProcessCall, *args, workers=2, storage=None, **kwargs):
         def dates_range(date_range: DatesRange):
             current_date = date_range.from_date
             last_date = date_range.to_date
@@ -95,8 +93,8 @@ class BatchProcess(object):
                             self.bands,
                             date,
                             date_range,
-                            None if self.storage is None else self.storage.get_storage_info(),
                             *args,
+                            storage=None if storage is None else storage.get_storage_info(),
                             **kwargs)
                     )
                 return run_concurrent(tasks, workers)
@@ -109,8 +107,8 @@ class BatchProcess(object):
                         self.bands,
                         date,
                         date_range,
-                        self.storage,
                         *args,
+                        storage=storage,
                         **kwargs
                     )
                     if result is not None:
