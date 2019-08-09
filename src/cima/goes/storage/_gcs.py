@@ -114,10 +114,10 @@ class GCS(GoesStorage):
         data = self.download_as_stream(filepath)
         return netCDF4.Dataset("in_memory_file", mode='r', memory=data)
 
-    def list_blobs(self, path: str):
+    def list_blobs(self, path: str, delimiter='/'):
         client = gcs.Client(credentials=self.credentials, project='')
         bucket = client.get_bucket(self.bucket)
-        return bucket.list_blobs(prefix=path, delimiter='/')
+        return bucket.list_blobs(prefix=path, delimiter=delimiter)
 
     def get_blob(self, name: str):
         client = gcs.Client(credentials=self.credentials, project='')
@@ -133,7 +133,8 @@ class GCS(GoesStorage):
     def day_band_blobs(self, year: int, month: int, day: int, hours: List[int], product_band: ProductBand) -> List[GoesBlob]:
         return self._list_blobs(
             day_path_prefix(year=year, month=month, day=day, product=product_band.product),
-            [hour_file_regex_pattern(hour=hour, band=product_band.band, product=product_band.product, mode=self.mode) for hour in hours]
+            [hour_file_regex_pattern(hour=hour, band=product_band.band, product=product_band.product, mode=self.mode) for hour in hours],
+            delimiter=None
         )
 
     def group_blobs(self, band_blobs_list: List[BandBlobs]) -> List[GroupedBandBlobs]:
@@ -182,7 +183,7 @@ class GCS(GoesStorage):
     def _list_blobs(self, path: str, gcs_patterns) -> List[GoesBlob]:
         print('entra con', path)
         print(gcs_patterns)
-        blobs = self.list_blobs(path)
+        blobs = self.list_blobs(path, delimiter='/')
         result = []
         if gcs_patterns is None or len(gcs_patterns) == 0:
             for blob in blobs:
