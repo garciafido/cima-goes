@@ -181,6 +181,7 @@ class GCS(GoesStorage):
 
     def _list_blobs(self, path: str, gcs_patterns) -> List[GoesBlob]:
         blobs = self.list_blobs(path)
+        print(path, gcs_patterns)
         result = []
         if gcs_patterns is None or len(gcs_patterns) == 0:
             for blob in blobs:

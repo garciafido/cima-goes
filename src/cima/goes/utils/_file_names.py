@@ -90,7 +90,7 @@ def file_name(band: Band, product=Product.CMIPF, mode=ANY_MODE):
     return f'{OR}_{product.value}-{mode}C{band:02d}_{G16}'
 
 
-def hour_file_name(hour:int, band: Band, product=Product.CMIPF, mode=ANY_MODE):
+def hour_file_name(hour: int, band: Band, product=Product.CMIPF, mode=ANY_MODE):
     return f'{hour:02d}/{OR}_{product.value}-{mode}C{band:02d}_{G16}'
 
 
