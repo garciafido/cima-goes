@@ -18,6 +18,12 @@ class NFS(Storage):
     def mkdir(self, path):
         raise Exception('Not implemented')
 
+    def download_stream(self, path):
+        raise Exception('Not implemented')
+
+    def upload_stream(self, stream, filepath):
+        raise Exception('Not implemented')
+
     def upload_data(self, data, filepath):
         with open(filepath, mode='w+b') as f:
             f.write(data)
