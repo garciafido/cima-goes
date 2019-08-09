@@ -36,6 +36,27 @@ class FTP(Storage):
         finally:
             ftp.close()
 
+    def try_cwd_path(self, ftp, path):
+        parts = path.split('/')
+        for part in parts:
+            try:
+                ftp.cwd(part)
+                print('cwd', part)
+            except Exception as e:
+                return
+
+    def create_path(self, ftp, path):
+        self.try_cwd_path(ftp, path)
+        parts = path.split('/')
+        for part in parts:
+            try:
+                ftp.mkd(part)
+                print('mkdir', part)
+                ftp.cwd(part)
+                print('cwd', part)
+            except Exception as e:
+                pass
+
     def upload_data(self, data: bytes, filepath: str, override: bool = True):
         ftp = ftplib.FTP()
         try:
@@ -43,7 +64,7 @@ class FTP(Storage):
             ftp.login(user=self.user, passwd=self.password)
             path = os.path.dirname(os.path.abspath(filepath))
             try:
-                ftp.mkd(path)
+                self.create_path(ftp, path)
             except Exception as e:
                 print(e)
                 pass
