@@ -1,8 +1,8 @@
 import datetime
 from dataclasses import dataclass
-from typing import List, Callable, Any, Dict
+from typing import List, Callable, Any, Dict, Tuple
 
-from cima.goes import ProductBand
+from cima.goes import ProductBand, Product, Band
 from cima.goes.storage import BandBlobs, GoesBlob, GoesStorage, GroupedBandBlobs, mount_goes_storage
 from cima.goes.storage import StorageInfo
 from cima.goes.storage import mount_storage
@@ -25,20 +25,13 @@ class DatesRange:
     hours_ranges: List[HoursRange]
 
 
-ProcessCall = Callable[[GoesStorage, int, int, int, int, int, List[BandBlobs], List[Any], Dict[str, Any]], Any]
-
-
-def _call(storage_info: StorageInfo, process: ProcessCall, year, month, day, hour, minute, blob_names, *args, **kwargs):
-    goes_storage = mount_goes_storage(storage_info)
-    blobs = [goes_storage.get_blob(name) for name in blob_names]
-    process(goes_storage,
-            year, month, day, hour, minute, blobs,
-            *args, **kwargs)
+ProcessCall = Callable[[GoesStorage, int, int, int, int, int, Dict[Tuple[Product, Band], GoesBlob], List[Any], Dict[str, Any]], Any]
 
 
 def process_day(process, goes_storage, bands, date, date_range, args, kwargs):
     if not isinstance(goes_storage, StorageInfo):
         goes_storage = mount_goes_storage(goes_storage)
+    results = []
     for hour_range in date_range.hours_ranges:
         hours = [hour for hour in range(hour_range.from_hour, hour_range.to_hour + 1)]
         grouped_blobs_list = goes_storage.grouped_one_day_blobs(
@@ -47,12 +40,14 @@ def process_day(process, goes_storage, bands, date, date_range, args, kwargs):
         for grouped_blobs in grouped_blobs_list:
             minute = int(grouped_blobs.start[9:11])
             hour = int(grouped_blobs.start[7:9])
-            process(
+            result = process(
                 goes_storage,
                 date.year, date.month, date.day, hour, minute,
-                [(bb.product, bb.band, bb.blobs[0]) for bb in grouped_blobs.blobs],
+                {(bb.product, bb.band): bb.blobs[0] for bb in grouped_blobs.blobs},
                 *args, **kwargs
             )
+            results.append(result)
+    return results
 
 
 class BatchProcess(object):
@@ -89,8 +84,9 @@ class BatchProcess(object):
                     )
                 return run_concurrent(tasks, workers)
             else:
+                results = []
                 for date in dates_range(date_range):
-                    process_day(
+                    result = process_day(
                         process,
                         self.goes_storage,
                         self.bands,
@@ -98,5 +94,7 @@ class BatchProcess(object):
                         date_range,
                         args, kwargs
                     )
+                    results.append(result)
+                return results
 
 
