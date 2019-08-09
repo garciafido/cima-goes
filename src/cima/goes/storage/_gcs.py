@@ -86,6 +86,7 @@ class GCS(GoesStorage):
 
     def grouped_one_day_blobs(self, year: int, month: int, day: int, hours: List[int], product_bands: List[ProductBand]) -> List[GroupedBandBlobs]:
         band_blobs_list: List[BandBlobs] = []
+        print('day_band_blobs')
         for product_band in product_bands:
             blobs = self.day_band_blobs(year, month, day, hours, product_band)
             band_blobs_list.append(BandBlobs(product_band.product, product_band.band, blobs))
@@ -125,16 +126,18 @@ class GCS(GoesStorage):
         return bucket.blob(name)
 
     def band_blobs(self, year: int, month: int, day: int, hour: int, product_band: ProductBand) -> List[GoesBlob]:
-      return self._list_blobs(
-          path_prefix(year=year, month=month, day=day, hour=hour, product=product_band.product),
-          [file_regex_pattern(band=product_band.band, product=product_band.product, mode=self.mode)]
-      )
+        return self._list_blobs(
+            path_prefix(year=year, month=month, day=day, hour=hour, product=product_band.product),
+            [file_regex_pattern(band=product_band.band, product=product_band.product, mode=self.mode)]
+        )
 
     def day_band_blobs(self, year: int, month: int, day: int, hours: List[int], product_band: ProductBand) -> List[GoesBlob]:
-      return self._list_blobs(
-          day_path_prefix(year=year, month=month, day=day, product=product_band.product),
-          [hour_file_regex_pattern(hour=hour, band=product_band.band, product=product_band.product, mode=self.mode) for hour in hours]
-      )
+        print('entra con')
+        print(day_path_prefix(year=year, month=month, day=day, product=product_band.product), hours)
+        return self._list_blobs(
+            day_path_prefix(year=year, month=month, day=day, product=product_band.product),
+            [hour_file_regex_pattern(hour=hour, band=product_band.band, product=product_band.product, mode=self.mode) for hour in hours]
+        )
 
     def group_blobs(self, band_blobs_list: List[BandBlobs]) -> List[GroupedBandBlobs]:
         blobs_by_start: Dict[str, Dict[Tuple[Product, Band], List[GoesBlob]]] = {}
@@ -181,7 +184,6 @@ class GCS(GoesStorage):
 
     def _list_blobs(self, path: str, gcs_patterns) -> List[GoesBlob]:
         blobs = self.list_blobs(path)
-        print(path, gcs_patterns)
         result = []
         if gcs_patterns is None or len(gcs_patterns) == 0:
             for blob in blobs:
@@ -189,7 +191,6 @@ class GCS(GoesStorage):
         else:
             for blob in blobs:
                 for pattern in gcs_patterns:
-                    print(blob.name, pattern)
                     if pattern.search(blob.name):
                         result.append(blob)
         return result
