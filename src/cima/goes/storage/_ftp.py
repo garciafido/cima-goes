@@ -45,6 +45,7 @@ class FTP(Storage):
             try:
                 ftp.mkd(path)
             except Exception as e:
+                print(e)
                 pass
             if override:
                 try:
