@@ -35,11 +35,12 @@ def process_day(process: ProcessCall,
                 date: datetime.date,
                 date_range: DatesRange,
                 *args,
+                storage: Storage=None,
                 **kwargs):
     if isinstance(goes_storage, StorageInfo):
         goes_storage = mount_goes_storage(goes_storage)
-    if 'storage' in kwargs and isinstance(goes_storage, StorageInfo):
-        storage = mount_storage(kwargs['storage'])
+    if isinstance(storage, StorageInfo):
+        storage = mount_storage(storage)
     results = []
     for hour_range in date_range.hours_ranges:
         hours = [hour for hour in range(hour_range.from_hour, hour_range.to_hour + 1)]
@@ -53,7 +54,9 @@ def process_day(process: ProcessCall,
                 goes_storage,
                 date.year, date.month, date.day, hour, minute,
                 {(bb.product, bb.band): bb.blobs[0] for bb in grouped_blobs.blobs},
-                *args, **kwargs
+                *args,
+                storage=storage,
+                **kwargs
             )
             if result is not None:
                 results.append(result)
@@ -93,7 +96,7 @@ class BatchProcess(object):
                             date,
                             date_range,
                             *args,
-                            storage=self.storage if self.storage is not None else self.storage.get_storage_info(),
+                            storage=None if self.storage is None else self.storage.get_storage_info(),
                             **kwargs)
                     )
                 return run_concurrent(tasks, workers)
