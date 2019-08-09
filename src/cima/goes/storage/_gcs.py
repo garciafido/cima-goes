@@ -188,8 +188,8 @@ class GCS(GoesStorage):
         else:
             for blob in blobs:
                 for pattern in gcs_patterns:
+                    print(blob.name, pattern)
                     if pattern.search(blob.name):
                         result.append(blob)
-                        break
         return result
 
