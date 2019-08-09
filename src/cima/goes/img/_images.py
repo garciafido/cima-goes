@@ -63,7 +63,7 @@ def fig2img(fig):
     # put the figure pixmap into a numpy array
     buf = fig2data(fig)
     w, h, d = buf.shape
-    return Image.frombuffer("RGBA", (w ,h), buf.tostring())
+    return Image.read("RGBA", (w ,h), buf.tostring())
 
 
 def _resize(image, new_size):
