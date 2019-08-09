@@ -64,7 +64,8 @@ def fig2img(fig):
     buf = fig2data(fig)
     w, h, d = buf.shape
     # im = Image.open(cStringIO.StringIO(buf))
-    return Image.open("RGBA", (w ,h), buf.tostring())
+    # return Image.frombuffer("RGBA", (w ,h), buf.tostring())
+    return Image.open("RGBA", buf.tostring())
 
 
 def _resize(image, new_size):
