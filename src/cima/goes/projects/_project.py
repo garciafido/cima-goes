@@ -38,11 +38,13 @@ def _call(storage_info: StorageInfo, process: ProcessCall, year, month, day, hou
 
 def process_day(process, storage_info, bands, date, date_range, args, kwargs):
     goes_storage = mount_goes_storage(storage_info)
+    print(goes_storage)
     for hour_range in date_range.hours_ranges:
         hours = [hour for hour in range(hour_range.from_hour, hour_range.to_hour + 1)]
         grouped_blobs_list = goes_storage.grouped_one_day_blobs(
             date.year, date.month, date.day, hours,
             bands)
+        print(grouped_blobs_list)
         for grouped_blobs in grouped_blobs_list:
             minute = int(grouped_blobs.start[9:11])
             hour = int(grouped_blobs.start[7:9])
