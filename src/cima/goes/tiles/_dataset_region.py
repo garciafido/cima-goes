@@ -41,6 +41,7 @@ class DatasetRegion:
     sat_band_key: SatBandKey
     region: LatLonRegion
     indexes: RegionIndexes
+    # shape: Tuple[int, int]
 
 
 TilesDict = Dict[Tuple[int, int], LatLonRegion]

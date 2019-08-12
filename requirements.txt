@@ -9,3 +9,4 @@ psutil
 aioftp
 aiofiles
 pillow
+opencv-python
