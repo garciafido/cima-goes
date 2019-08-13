@@ -253,8 +253,8 @@ def get_fig_stream(image,
             add_cultural(ax)
         if draw_grid:
             add_grid(ax)
-        else:
-            ax.axis('off')
+        # else:
+        ax.axis('off')
 
         pcolormesh(ax, image, lons, lats, cmap=cmap, vmin=vmin, vmax=vmax)
         fig.add_axes(ax, projection=ccrs.PlateCarree())
