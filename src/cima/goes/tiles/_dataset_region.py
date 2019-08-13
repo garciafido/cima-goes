@@ -188,8 +188,8 @@ def get_data(dataset, indexes: RegionIndexes, variable: str = None):
     if variable is None:
         if 'CMI' in dataset.variables:
             variable = 'CMI'
-    elif 'Rad' in dataset.variables:
-        variable = 'Rad'
+        elif 'Rad' in dataset.variables:
+            variable = 'Rad'
     return dataset.variables[variable][indexes.y_min : indexes.y_max, indexes.x_min : indexes.x_max]
 
 
