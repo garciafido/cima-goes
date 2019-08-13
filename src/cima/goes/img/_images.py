@@ -100,6 +100,11 @@ def compose_rgb(dataset_red, dataset_veggie, dataset_blue,
     return rgb, red, green, blue_resized
 
 
+def get_cropped_cv2_image(image, x: int, y: int, width, height):
+    image_shape = image.shape
+    return image[x:min(x+width, image_shape[0]), y:min(y+height, image_shape[1])]
+
+
 def add_cultural(ax):
     states_provinces = cartopy.feature.NaturalEarthFeature(
         category='cultural',
