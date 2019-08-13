@@ -105,6 +105,17 @@ def get_cropped_cv2_image(image, x: int, y: int, width, height):
     return image[x:min(x+width, image_shape[0]), y:min(y+height, image_shape[1])]
 
 
+def get_clipped(image, image_region: LatLonRegion, clip: LatLonRegion):
+    image_shape = image.shape
+    pixels_per_lon = image_shape(0) / abs(image_region.lon_east-image_region.lon_west)
+    pixels_per_lat = image_shape(1) / abs(image_region.lat_south-image_region.lat_north)
+    x = pixels_per_lon * abs(image_region.lon_east-clip.lon_west)
+    y = pixels_per_lat * abs(image_region.lat_north-clip.lat_north)
+    width = pixels_per_lon * abs(clip.lon_east-clip.lon_west)
+    height = pixels_per_lat * abs(clip.lat_south-clip.lat_north)
+    return image[x:min(x+width, image_shape[0]), y:min(y+height, image_shape[1])]
+
+
 def add_cultural(ax):
     states_provinces = cartopy.feature.NaturalEarthFeature(
         category='cultural',
