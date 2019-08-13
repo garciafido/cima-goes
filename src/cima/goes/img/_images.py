@@ -113,6 +113,7 @@ def get_clipped(image, image_region: LatLonRegion, clip: LatLonRegion):
     y = pixels_per_lat * abs(image_region.lat_north-clip.lat_north)
     width = pixels_per_lon * abs(clip.lon_east-clip.lon_west)
     height = pixels_per_lat * abs(clip.lat_south-clip.lat_north)
+    print('CLIP:', x, y, width, height)
     return image[x:min(x+width, image_shape[0]), y:min(y+height, image_shape[1])]
 
 
