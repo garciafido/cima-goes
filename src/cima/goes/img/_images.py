@@ -197,7 +197,7 @@ def save_image(image,
         _, file_extension = os.path.splitext(filepath)
         if file_extension[0] == '.':
             format = file_extension[1:]
-    figure = getfig(image, lonlat_region, lats, lons, format=format, cmap=cmap, vmin=vmin, vmax=vmax,
+    figure = get_fig_stream(image, lonlat_region, lats, lons, format=format, cmap=cmap, vmin=vmin, vmax=vmax,
                     draw_cultural=draw_cultural, draw_grid=draw_grid, trim_excess=0)
     storage.upload_data(figure, filepath)
     figure.seek(0)
@@ -205,6 +205,36 @@ def save_image(image,
 
 
 def getfig(image,
+           region: LatLonRegion,
+           lats, lons,
+           format='png',
+           cmap=None, vmin=None, vmax=None,
+           draw_cultural=False, draw_grid=False,
+           trim_excess=0):
+    image_inches = get_image_inches(image)
+    fig = plt.figure(frameon=False)
+    try:
+        fig.set_size_inches(image_inches.x, image_inches.y)
+        ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
+        ax.set_axis_off()
+        set_extent(ax, region, trim_excess)
+
+        if draw_cultural:
+            add_cultural(ax)
+        if draw_grid:
+            add_grid(ax)
+        else:
+            ax.axis('off')
+
+        pcolormesh(ax, image, lons, lats, cmap=cmap, vmin=vmin, vmax=vmax)
+        fig.add_axes(ax, projection=ccrs.PlateCarree())
+        return fig
+    finally:
+        # fig.clear()
+        plt.close()
+
+
+def get_fig_stream(image,
            region: LatLonRegion,
            lats, lons,
            format='png',
