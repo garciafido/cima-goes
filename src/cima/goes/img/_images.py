@@ -125,7 +125,7 @@ def add_grid(ax):
                       linestyle='dotted',
                       color='r',
                       crs=ccrs.PlateCarree(),
-                      draw_labels=True)
+                      draw_labels=False)
 
 
 def get_cloud_tops_palette():
