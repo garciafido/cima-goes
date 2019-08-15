@@ -106,3 +106,12 @@ def slice_obs_start(product=Product.CMIPF):
     prefix_pos = len(path_prefix(year=1111, month=1, day=1, hour=11, product=product)) + len(
         file_name(band=Band.RED, product=product)) + 2
     return slice(prefix_pos, prefix_pos + len('20183650045364'))
+
+
+# Browse: https://console.cloud.google.com/storage/browser/gcp-public-data-goes-16
+GOES_PUBLIC_BUCKET = 'gcp-public-data-goes-16'
+
+
+def get_gcs_url(filepath: str):
+    return f'https://storage.cloud.google.com/{GOES_PUBLIC_BUCKET}/{filepath}'
+

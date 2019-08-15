@@ -1,5 +1,3 @@
-from typing import List
-
 from cima.goes import ProductBand, Product, Band
 from cima.goes.tiles import LatLonRegion, expand_region
 from cima.goes.tiles import get_tiles

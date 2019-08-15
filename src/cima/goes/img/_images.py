@@ -6,68 +6,17 @@ import numpy as np
 import cartopy
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
 from cima.goes.storage._file_systems import Storage
 from cima.goes.tiles import DatasetRegion, LatLonRegion, get_tile_extent
 from cima.goes.utils.load_cpt import load_cpt
 from matplotlib.axes import Axes
-# from PIL import Image
+from PIL import Image
 
 
 LOCAL_BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 
 
-# def fig2data(fig):
-#     """
-#     @brief Convert a Matplotlib figure to a 4D numpy array with RGBA channels and return it
-#     @param fig a matplotlib figure
-#     @return a numpy 3D array of RGBA values
-#     """
-#     # draw the renderer
-#     fig.canvas.draw()
-#
-#     # Get the RGBA buffer from the figure
-#     w, h = fig.canvas.get_width_height()
-#     buf = np.frombuffer(fig.canvas.tostring_argb(), dtype=np.uint8)
-#     buf.shape = (w, h, 4)
-#
-#     # canvas.tostring_argb give pixmap in ARGB mode. Roll the ALPHA channel to have it in RGBA mode
-#     buf = np.roll(buf, 3, axis=2)
-#     return buf
-#
-#
-# def fig2data(fig):
-#     """
-#     @brief Convert a Matplotlib figure to a 4D numpy array with RGBA channels and return it
-#     @param fig a matplotlib figure
-#     @return a numpy 3D array of RGBA values
-#     """
-#     # draw the renderer
-#     fig.canvas.draw()
-#
-#     # Get the RGBA buffer from the figure
-#     w, h = fig.canvas.get_width_height()
-#     buf = np.frombuffer(fig.canvas.tostring_argb(), dtype=np.uint8)
-#     buf.shape = (w, h, 4)
-#
-#     # canvas.tostring_argb give pixmap in ARGB mode. Roll the ALPHA channel to have it in RGBA mode
-#     buf = np.roll(buf, 3, axis=2)
-#     return buf
-#
-#
-# def fig2img(fig):
-#     """
-#     @brief Convert a Matplotlib figure to a PIL Image in RGBA format and return it
-#     @param fig a matplotlib figure
-#     @return a Python Imaging Library ( PIL ) image
-#     """
-#     # put the figure pixmap into a numpy array
-#     buf = fig2data(fig)
-#     w, h, d = buf.shape
-#     # im = Image.open(cStringIO.StringIO(buf))
-#     # return Image.frombuffer("RGBA", (w ,h), buf.tostring())
-#     return Image.open("RGBA", buf.tostring())
-#
-#
 def _resize(image, new_size):
   return cv2.resize(image, dsize=new_size, interpolation=cv2.INTER_CUBIC)
 
@@ -142,6 +91,8 @@ def add_grid(ax):
                       color='r',
                       crs=ccrs.PlateCarree(),
                       draw_labels=False)
+    gl.xlocator = mticker.FixedLocator([x for x in range(-180, 180, 1)])
+    gl.ylocator = mticker.FixedLocator([x for x in range(-180, 180, 1)])
 
 
 def get_cloud_tops_palette():
@@ -213,7 +164,7 @@ def save_image(image,
         _, file_extension = os.path.splitext(filepath)
         if file_extension[0] == '.':
             format = file_extension[1:]
-    figure = get_fig_stream(image, lonlat_region, lats, lons, format=format, cmap=cmap, vmin=vmin, vmax=vmax,
+    figure = get_image_stream(image, lonlat_region, lats, lons, format=format, cmap=cmap, vmin=vmin, vmax=vmax,
                     draw_cultural=draw_cultural, draw_grid=draw_grid, trim_excess=0)
     storage.upload_data(figure, filepath)
     figure.seek(0)
@@ -250,15 +201,16 @@ def getfig(image,
         plt.close()
 
 
-def get_fig_stream(image,
-           region: LatLonRegion,
-           lats, lons,
-           format='png',
-           cmap=None, vmin=None, vmax=None,
-           draw_cultural=False, draw_grid=False,
-           trim_excess=0):
-    image_inches = get_image_inches(image)
-    fig = plt.figure(frameon=False)
+def get_image_stream(
+        data,
+        region: LatLonRegion,
+        lats, lons,
+        format='png',
+        cmap=None, vmin=None, vmax=None,
+        draw_cultural=False, draw_grid=False,
+        trim_excess=0):
+    image_inches = get_image_inches(data)
+    fig = plt.figure()
     try:
         fig.set_size_inches(image_inches.x, image_inches.y)
         ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
@@ -269,10 +221,9 @@ def get_fig_stream(image,
             add_cultural(ax)
         if draw_grid:
             add_grid(ax)
-        # else:
         ax.axis('off')
 
-        pcolormesh(ax, image, lons, lats, cmap=cmap, vmin=vmin, vmax=vmax)
+        pcolormesh(ax, data, lons, lats, cmap=cmap, vmin=vmin, vmax=vmax)
         fig.add_axes(ax, projection=ccrs.PlateCarree())
         buffer = io.BytesIO()
         plt.savefig(buffer, format=format, dpi=image_inches.dpi, bbox_inches='tight', pad_inches=0)
@@ -283,32 +234,40 @@ def get_fig_stream(image,
         plt.close()
 
 
-def get_pil_img(image,
-           region: LatLonRegion,
-           lats, lons,
-           cmap=None, vmin=None, vmax=None,
-           draw_cultural=False, draw_grid=False,
-           trim_excess=0):
-    image_inches = get_image_inches(image)
-    fig = plt.figure(frameon=False)
-    try:
-        fig.set_size_inches(image_inches.x, image_inches.y)
-        ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
-        ax.set_axis_off()
-        set_extent(ax, region, trim_excess)
+def get_pil_image(
+        image,
+        region: LatLonRegion,
+        lats, lons,
+        cmap=None, vmin=None, vmax=None,
+        draw_cultural=False, draw_grid=False,
+        trim_excess=0):
+    image_stream = get_image_stream(image,
+           region=region,
+           lats=lats, lons=lons,
+           cmap=cmap, vmin=vmin, vmax=vmax,
+           draw_cultural=draw_cultural, draw_grid=draw_grid,
+           trim_excess=trim_excess)
+    return Image.open(image_stream)
 
-        if draw_cultural:
-            add_cultural(ax)
-        if draw_grid:
-            add_grid(ax)
-        else:
-            ax.axis('off')
 
-        pcolormesh(ax, image, lons, lats, cmap=cmap, vmin=vmin, vmax=vmax)
-        fig.add_axes(ax, projection=ccrs.PlateCarree())
-        return fig2img(fig)
-    finally:
-        fig.clear()
-        plt.close()
+def pil2cv(pil_image: Image):
+    # return np.array(pil_image.convert('RGB'))[:, :, ::-1].copy()
+    return np.array(pil_image)[:, :, ::-1].copy()
+
+
+def cv2pil(cv_image: Image):
+    return cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
+
+
+def stream2cv(image_stream):
+    image_stream.seek(0)
+    np_image = np.asarray(bytearray(image_stream.read()), dtype="uint8")
+    return cv2.imdecode(np_image, cv2.IMREAD_COLOR)
+
+
+def stream2pil(image_stream) -> Image:
+    image_stream.seek(0)
+    return Image.open(image_stream).convert('RGB')
+
 
 

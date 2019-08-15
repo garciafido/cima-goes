@@ -4,7 +4,7 @@ import netCDF4
 from collections import namedtuple
 from typing import List, Dict, Tuple
 import google.cloud.storage as gcs
-from cima.goes.utils._file_names import ProductBand
+from cima.goes.utils._file_names import ProductBand, GOES_PUBLIC_BUCKET
 from google.oauth2 import service_account
 from cima.goes.utils._file_names import file_regex_pattern, path_prefix, slice_obs_start, Product
 from cima.goes.utils._file_names import day_path_prefix, hour_file_regex_pattern
@@ -12,10 +12,6 @@ from cima.goes import Band, ANY_MODE
 from cima.goes.storage._file_systems import Storage, storage_type, StorageInfo
 from cima.goes.storage._blobs import GoesBlob, GroupedBandBlobs, BandBlobs
 from cima.goes.storage._goes_data import GoesStorage
-
-
-# Browse: https://console.cloud.google.com/storage/browser/gcp-public-data-goes-16
-GOES_PUBLIC_BUCKET = 'gcp-public-data-goes-16'
 
 
 class GCS(GoesStorage):
