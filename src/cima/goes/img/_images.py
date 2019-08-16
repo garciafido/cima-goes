@@ -84,15 +84,15 @@ def add_cultural(ax):
     ax.add_feature(states_provinces, edgecolor='white', linewidth=linewidth)
 
 
-def add_grid(ax):
+def add_grid(ax, draw_labels=True):
     linewidth = 1.25
     gl = ax.gridlines(linewidth=linewidth,
                       linestyle='dotted',
-                      color='r',
+                      color='gray',
                       crs=ccrs.PlateCarree(),
-                      draw_labels=False)
-    gl.xlocator = mticker.FixedLocator([x for x in range(-180, 180, 1)])
-    gl.ylocator = mticker.FixedLocator([x for x in range(-180, 180, 1)])
+                      draw_labels=draw_labels)
+    gl.xlocator = mticker.FixedLocator([x for x in range(-180, 180, 2)])
+    gl.ylocator = mticker.FixedLocator([x for x in range(-180, 180, 2)])
 
 
 def get_cloud_tops_palette():
