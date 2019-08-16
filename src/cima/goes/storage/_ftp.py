@@ -102,6 +102,6 @@ class FTP(Storage):
         finally:
             ftp.close()
 
-    def download_dataset(self, filepath: str) -> netCDF4.Dataset:
+    def get_dataset(self, filepath: str) -> netCDF4.Dataset:
         data = self.download_data(filepath)
         return netCDF4.Dataset("in_memory_file", mode='r', memory=data)
