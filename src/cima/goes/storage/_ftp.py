@@ -48,7 +48,7 @@ class FTP(Storage):
                 ftp.cwd(part)
 
     def upload_data(self, data: bytes, filepath: str, override: bool = True):
-        stream = io.BytesIO
+        stream = io.BytesIO()
         stream.write(data)
         stream.seek(0)
         self.upload_stream(stream, filepath, override)
