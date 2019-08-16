@@ -123,13 +123,13 @@ class GCS(GoesStorage):
     def band_blobs(self, year: int, month: int, day: int, hour: int, product_band: ProductBand) -> List[GoesBlob]:
         return self._list_blobs(
             path_prefix(year=year, month=month, day=day, hour=hour, product=product_band.product),
-            [file_regex_pattern(band=product_band.band, product=product_band.product, mode=self.mode)]
+            [file_regex_pattern(band=product_band.band, product=product_band.product, mode=self.mode, subproduct=product_band.subproduct)]
         )
 
     def day_band_blobs(self, year: int, month: int, day: int, hours: List[int], product_band: ProductBand) -> List[GoesBlob]:
         return self._list_blobs(
             day_path_prefix(year=year, month=month, day=day, product=product_band.product),
-            [hour_file_regex_pattern(hour=hour, band=product_band.band, product=product_band.product, mode=self.mode) for hour in hours],
+            [hour_file_regex_pattern(hour=hour, band=product_band.band, product=product_band.product, mode=self.mode, subproduct=product_band.subproduct) for hour in hours],
             delimiter=None
         )
 

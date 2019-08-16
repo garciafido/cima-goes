@@ -47,15 +47,9 @@ class Product(Enum):
     # Full disk
     RadF = 'ABI-L1b-RadF' # Radiances. Full disk. 15 Minutes
     # Mesoscale
-    CMIPM1 = 'ABI-L2-CMIPM1' # Cloud & Moisture Imagery. Mesoscale. 30-60 seconds
-    CMIPM2 = 'ABI-L2-CMIPM2' # Cloud & Moisture Imagery. Mesoscale. 30-60 seconds
-    CMIPM3 = 'ABI-L2-CMIPM3' # Cloud & Moisture Imagery. Mesoscale. 30-60 seconds
-    MCMIPM1 = 'ABI-L2-MCMIPM1' # Multi-Band Cloud & Moisture Imagery. Mesoscale.  30-60 seconds
-    MCMIPM2 = 'ABI-L2-MCMIPM2' # Multi-Band Cloud & Moisture Imagery. Mesoscale.  30-60 seconds
-    MCMIPM3 = 'ABI-L2-MCMIPM3' # Multi-Band Cloud & Moisture Imagery. Mesoscale.  30-60 seconds
-    RadM1 = 'ABI-L1b-RadM1' # Radiances. Mesoscale. 30-60 seconds
-    RadM2 = 'ABI-L1b-RadM2' # Radiances. Mesoscale. 30-60 seconds
-    RadM3 = 'ABI-L1b-RadM3' # Radiances. Mesoscale. 30-60 seconds
+    CMIPM = 'ABI-L2-CMIPM' # Cloud & Moisture Imagery. Mesoscale. 30-60 seconds
+    MCMIPM = 'ABI-L2-MCMIPM' # Multi-Band Cloud & Moisture Imagery. Mesoscale.  30-60 seconds
+    RadM = 'ABI-L1b-RadM' # Radiances. Mesoscale. 30-60 seconds
 
 
 class Band(IntEnum):
@@ -81,6 +75,7 @@ class Band(IntEnum):
 class ProductBand:
     product: Product
     band: Band
+    subproduct: int = None
 
 
 OR = 'OR' # Operational System Real-Time Data
@@ -102,25 +97,27 @@ def day_path_prefix(year: int, month: int, day: int, product=Product.CMIPF):
     return f'{product.value}/{year:04d}/{day_of_year:03d}/'
 
 
-def file_name(band: Band, product=Product.CMIPF, mode=ANY_MODE):
-    return f'{OR}_{product.value}-{mode}C{band:02d}_{G16}'
+def file_name(band: Band, product=Product.CMIPF, mode=ANY_MODE, subproduct: int = None):
+    subp = subproduct if subproduct is not None else ''
+    return f'{OR}_{product.value}{subp}-{mode}C{band:02d}_{G16}'
 
 
-def hour_file_name(hour: int, band: Band, product=Product.CMIPF, mode=ANY_MODE):
-    return f'{hour:02d}/{OR}_{product.value}-{mode}C{band:02d}_{G16}'
+def hour_file_name(hour: int, band: Band, product=Product.CMIPF, mode=ANY_MODE, subproduct: int = None):
+    subp = subproduct if subproduct is not None else ''
+    return f'{hour:02d}/{OR}_{product.value}{subp}-{mode}C{band:02d}_{G16}'
 
 
-def file_regex_pattern(band: Band, product: Product = Product.CMIPF, mode: str = ANY_MODE):
-    return re.compile(file_name(band, product, mode))
+def file_regex_pattern(band: Band, product: Product = Product.CMIPF, mode: str = ANY_MODE, subproduct: int = None):
+    return re.compile(file_name(band, product, mode, subproduct=subproduct))
 
 
-def hour_file_regex_pattern(hour: int, band: Band, product: Product = Product.CMIPF, mode: str = ANY_MODE):
-    return re.compile(hour_file_name(hour, band, product, mode))
+def hour_file_regex_pattern(hour: int, band: Band, product: Product = Product.CMIPF, mode: str = ANY_MODE, subproduct: int = None):
+    return re.compile(hour_file_name(hour, band, product, mode, subproduct=subproduct))
 
 
-def slice_obs_start(product=Product.CMIPF):
+def slice_obs_start(product=Product.CMIPF, subproduct: int = None):
     prefix_pos = len(path_prefix(year=1111, month=1, day=1, hour=11, product=product)) + len(
-        file_name(band=Band.RED, product=product)) + 2
+        file_name(band=Band.RED, product=product, subproduct=subproduct)) + 2
     return slice(prefix_pos, prefix_pos + len('20183650045364'))
 
 
