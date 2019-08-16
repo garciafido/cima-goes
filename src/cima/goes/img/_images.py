@@ -164,7 +164,7 @@ def save_image(image,
         _, file_extension = os.path.splitext(filepath)
         if file_extension[0] == '.':
             format = file_extension[1:]
-    figure = get_image_stream(image, lonlat_region, lats, lons, format=format, cmap=cmap, vmin=vmin, vmax=vmax,
+    figure = get_image_stream(image, lats, lons, lonlat_region, format=format, cmap=cmap, vmin=vmin, vmax=vmax,
                     draw_cultural=draw_cultural, draw_grid=draw_grid, trim_excess=0)
     storage.upload_data(figure, filepath)
     figure.seek(0)
@@ -203,8 +203,8 @@ def getfig(image,
 
 def get_image_stream(
         data,
-        region: LatLonRegion,
         lats, lons,
+        region: LatLonRegion = None,
         format='png',
         cmap=None, vmin=None, vmax=None,
         draw_cultural=False, draw_grid=False,
@@ -215,7 +215,8 @@ def get_image_stream(
         fig.set_size_inches(image_inches.x, image_inches.y)
         ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
         ax.set_axis_off()
-        set_extent(ax, region, trim_excess)
+        if region is not None:
+            set_extent(ax, region, trim_excess)
 
         if draw_cultural:
             add_cultural(ax)
@@ -242,8 +243,8 @@ def get_pil_image(
         draw_cultural=False, draw_grid=False,
         trim_excess=0):
     image_stream = get_image_stream(image,
-           region=region,
            lats=lats, lons=lons,
+           region=region,
            cmap=cmap, vmin=vmin, vmax=vmax,
            draw_cultural=draw_cultural, draw_grid=draw_grid,
            trim_excess=trim_excess)
