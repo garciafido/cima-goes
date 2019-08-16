@@ -184,13 +184,16 @@ def get_lats_lons(dataset, indexes: RegionIndexes = None):
     return np.array(lats), np.array(lons)
 
 
-def get_data(dataset, indexes: RegionIndexes, variable: str = None):
+def get_data(dataset, indexes: RegionIndexes = None, variable: str = None):
     if variable is None:
         if 'CMI' in dataset.variables:
             variable = 'CMI'
         elif 'Rad' in dataset.variables:
             variable = 'Rad'
-    return dataset.variables[variable][indexes.y_min : indexes.y_max, indexes.x_min : indexes.x_max]
+    if indexes is None:
+        return dataset.variables[variable][:,:]
+    else:
+        return dataset.variables[variable][indexes.y_min : indexes.y_max, indexes.x_min : indexes.x_max]
 
 
 def get_dataset_key(dataset: Dataset) -> SatBandKey:
