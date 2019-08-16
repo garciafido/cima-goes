@@ -1,3 +1,4 @@
+import os
 import netCDF4
 from cima.goes.storage._file_systems import Storage, storage_type, StorageInfo
 
@@ -25,6 +26,9 @@ class NFS(Storage):
         raise Exception('Not implemented')
 
     def upload_data(self, data, filepath):
+        directory = os.path.dirname(filepath)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
         with open(filepath, mode='w+b') as f:
             f.write(data)
 
