@@ -93,6 +93,8 @@ def add_grid(ax, draw_labels=True):
                       draw_labels=draw_labels)
     gl.xlocator = mticker.FixedLocator([x for x in range(-180, 180, 2)])
     gl.ylocator = mticker.FixedLocator([x for x in range(-180, 180, 2)])
+    gl.xlabels_top = False
+    gl.ylabels_right = False
 
 
 def get_cloud_tops_palette():
