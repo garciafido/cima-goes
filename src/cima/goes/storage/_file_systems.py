@@ -1,8 +1,9 @@
 import abc
 import io
 from enum import Enum
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Union
 from dataclasses import dataclass
+import netCDF4
 
 
 class storage_type(Enum):
@@ -11,6 +12,7 @@ class storage_type(Enum):
     FTP = 'ftp' # File Transfer Protocol
     AFTP = 'async_ftp' # File Transfer Protocol
     GCS = 'gcs' # Google Cloud Storage
+    HTTP = 'http' # HTTP protocol
 
 
 @dataclass
@@ -51,5 +53,9 @@ class Storage(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def download_stream(self, filepath: str) -> io.BytesIO:
+        pass
+
+    @abc.abstractmethod
+    def get_dataset(self, blob) -> netCDF4.Dataset:
         pass
 

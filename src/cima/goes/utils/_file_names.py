@@ -15,6 +15,8 @@ import re
 # sYYYYJJJHHMMSSs: Observation Start
 # eYYYYJJJHHMMSSs: Observation End
 # cYYYYJJJHHMMSSs: File Creation
+#
+# http://edc.occ-data.org/goes16/getdata/
 
 
 class Product(Enum):
@@ -25,6 +27,8 @@ class Product(Enum):
     ADPF = 'ABI-L2-ADPF' # Aerosol Detection (including Smoke and Dust)
     AODF = 'ABI-L2-AODF' # Aerosol Optical Depth
     CMIPF = 'ABI-L2-CMIPF' # Cloud and Moisture Image Product – Full Disk
+    MCMIPF = 'ABI-L2-MCMIPF'
+    MCMIPC = 'ABI-L2-MCMIPC'
     CODF = 'ABI-L2-CODF' # Cloud Optical Depth
     CPSF = 'ABI-L2-CPSF' # Cloud Particle Size Distribution
     DSIF = 'ABI-L2-DSIF' # Derived Stability Indices
@@ -37,9 +41,15 @@ class Product(Enum):
     TPWF = 'ABI-L2-TPWF' # Total Precipitable Water
     VAAF = 'ABI-L2-VAAF' # Volcanic Ash
     LCFA = 'GLM-L2-LCFA'
-    RadC = 'ABI-L1b-RadC'
-    RadF = 'ABI-L1b-RadF'
-    RadM = 'ABI-L1b-RadM'
+    # Conus
+    CMIPC = 'ABI-L2-CMIPC' # Cloud & Moisture Imagery. Conus. 5 Minutes
+    RadC = 'ABI-L1b-RadC' # Radiances. Conus. 5 Minutes
+    # Full disk
+    RadF = 'ABI-L1b-RadF' # Radiances. Full disk. 15 Minutes
+    # Mesoscale
+    CMIPM = 'ABI-L2-CMIPM' # Cloud & Moisture Imagery. Mesoscale. 30-60 seconds
+    MCMIPM = 'ABI-L2-MCMIPM' # Multi-Band Cloud & Moisture Imagery. Mesoscale.  30-60 seconds
+    RadM = 'ABI-L1b-RadM' # Radiances. Mesoscale. 30-60 seconds
 
 
 class Band(IntEnum):

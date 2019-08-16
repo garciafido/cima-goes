@@ -29,9 +29,9 @@ class NFS(Storage):
             f.write(data)
 
     def download_data(self, filepath):
-        with open(filepath, mode='r') as f:
+        with open(filepath, mode='rb') as f:
             return f.read()
 
-    def download_dataset(self, filepath):
+    def get_dataset(self, filepath):
         data = self.download_data(filepath)
         return netCDF4.Dataset("in_memory_file", mode='r', memory=data)

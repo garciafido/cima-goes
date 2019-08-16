@@ -1,5 +1,5 @@
 import abc
-from typing import List
+from typing import List, Union
 from cima.goes.storage._blobs import GroupedBandBlobs, GoesBlob, BandBlobs
 from cima.goes.storage._file_systems import Storage
 from cima.goes import ProductBand
@@ -25,8 +25,4 @@ class GoesStorage(Storage):
 
     @abc.abstractmethod
     def get_blob(self, name: str) -> GoesBlob:
-        pass
-
-    @abc.abstractmethod
-    def get_dataset(self, blob: GoesBlob) -> Dataset:
         pass
