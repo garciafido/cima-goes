@@ -23,7 +23,7 @@ class NFS(Storage):
         raise Exception('Not implemented')
 
     def upload_stream(self, stream, filepath):
-        raise Exception('Not implemented')
+        self.upload_data(stream.read(), filepath)
 
     def upload_data(self, data, filepath):
         directory = os.path.dirname(filepath)

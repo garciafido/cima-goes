@@ -50,7 +50,6 @@ class FTP(Storage):
     def upload_data(self, data: bytes, filepath: str, override: bool = True):
         stream = io.BytesIO()
         stream.write(data)
-        stream.seek(0)
         self.upload_stream(stream, filepath, override)
 
     def upload_stream(self, stream: io.BytesIO, filepath: str, override: bool = True):
