@@ -208,6 +208,7 @@ def get_image_stream(
         format='png',
         cmap=None, vmin=None, vmax=None,
         draw_cultural=False, draw_grid=False,
+        title: str = None,
         trim_excess=0):
     image_inches = get_image_inches(data)
     fig = plt.figure()
@@ -222,6 +223,8 @@ def get_image_stream(
             add_cultural(ax)
         if draw_grid:
             add_grid(ax)
+        if title is not None:
+            ax.title.set_text(title)
         ax.axis('off')
 
         pcolormesh(ax, data, lons, lats, cmap=cmap, vmin=vmin, vmax=vmax)
