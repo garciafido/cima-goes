@@ -48,23 +48,10 @@ class FTP(Storage):
                 ftp.cwd(part)
 
     def upload_data(self, data: bytes, filepath: str, override: bool = True):
-        ftp = ftplib.FTP()
-        try:
-            ftp.connect(host=self.host, port=self.port)
-            ftp.login(user=self.user, passwd=self.password)
-            path = os.path.dirname(os.path.abspath(filepath))
-            try:
-                self.try_create_path(ftp, path)
-            except Exception as e:
-                pass
-            if override:
-                try:
-                    ftp.delete(filepath)
-                except:
-                    pass
-            ftp.storbinary('STOR ' + filepath, data)
-        finally:
-            ftp.close()
+        stream = io.BytesIO
+        stream.write(data)
+        stream.seek(0)
+        self.upload_stream(stream, filepath, override)
 
     def upload_stream(self, stream: io.BytesIO, filepath: str, override: bool = True):
         ftp = ftplib.FTP()
