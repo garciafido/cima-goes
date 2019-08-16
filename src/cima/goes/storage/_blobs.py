@@ -12,6 +12,7 @@ class BandBlobs:
     product: Product
     band: Band
     blobs: List[GoesBlob]
+    subproduct: int = None
 
 
 @dataclass

@@ -21,6 +21,7 @@ class GCS(GoesStorage):
     def __init__(self, credentials_as_dict: dict=None,
                  bucket: str=GOES_PUBLIC_BUCKET,
                  product: Product=Product.CMIPF, mode: str = ANY_MODE,
+                 subproduct: int = None,
                  credentials_filepath: str=None):
         self.credentials_as_dict = credentials_as_dict
         self.credentials_filepath = credentials_filepath
@@ -31,6 +32,7 @@ class GCS(GoesStorage):
             if credentials_filepath is not None:
                 self.set_credentials(credentials_filepath)
         self.product = product
+        self.subproduct = subproduct
         self.mode = mode
         self.bucket = bucket
 
@@ -73,23 +75,23 @@ class GCS(GoesStorage):
         band_blobs_list: List[BandBlobs] = []
         for product_band in product_bands:
             blobs = self.band_blobs(year, month, day, hour, product_band)
-            band_blobs_list.append(BandBlobs(product_band.product, product_band.band, blobs))
+            band_blobs_list.append(BandBlobs(product_band.product, product_band.band, blobs, subproduct=product_band.subproduct))
         return self.group_blobs(band_blobs_list)
 
     def one_hour_blobs(self, year: int, month: int, day: int, hour: int, product_band: ProductBand) -> BandBlobs:
         blobs = self.band_blobs(year, month, day, hour, product_band)
-        return BandBlobs(product_band.product, product_band.band, blobs)
+        return BandBlobs(product_band.product, product_band.band, blobs, subproduct=product_band.subproduct)
 
     def grouped_one_day_blobs(self, year: int, month: int, day: int, hours: List[int], product_bands: List[ProductBand]) -> List[GroupedBandBlobs]:
         band_blobs_list: List[BandBlobs] = []
         for product_band in product_bands:
             blobs = self.day_band_blobs(year, month, day, hours, product_band)
-            band_blobs_list.append(BandBlobs(product_band.product, product_band.band, blobs))
+            band_blobs_list.append(BandBlobs(product_band.product, product_band.band, blobs, subproduct=product_band.subproduct))
         return self.group_blobs(band_blobs_list)
 
     def one_day_blobs(self, year: int, month: int, day: int, hours: List[int], product_band: ProductBand) -> BandBlobs:
         blobs = self.day_band_blobs(year, month, day, hours, product_band)
-        return BandBlobs(product_band.product, product_band.band, blobs)
+        return BandBlobs(product_band.product, product_band.band, blobs, subproduct=product_band.subproduct)
 
     #
     # GCS methods
@@ -137,7 +139,7 @@ class GCS(GoesStorage):
         blobs_by_start: Dict[str, Dict[Tuple[Product, Band], List[GoesBlob]]] = {}
         for band_blobs in band_blobs_list:
             for blob in band_blobs.blobs:
-                key = blob.name[slice_obs_start(product=self.product)]
+                key = blob.name[slice_obs_start(product=band_blobs.product, subproduct=band_blobs.subproduct)]
                 if key not in blobs_by_start:
                     blobs_by_start[key] = {(band_blobs.product, band_blobs.band): [blob]}
                 else:
@@ -149,8 +151,8 @@ class GCS(GoesStorage):
         result: List[GroupedBandBlobs] = []
         for start, band_blobs_dict in blobs_by_start.items():
             blobs_list: List[BandBlobs] = []
-            for product_band, blobs in band_blobs_dict.items():
-                band_blob: BandBlobs = BandBlobs(product_band[0], product_band[1], blobs)
+            for pband, blobs in band_blobs_dict.items():
+                band_blob: BandBlobs = BandBlobs(pband[0], pband[1], blobs)
                 blobs_list.append(band_blob)
             result.append(GroupedBandBlobs(start, blobs_list))
         return result
