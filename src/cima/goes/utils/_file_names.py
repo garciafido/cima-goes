@@ -47,9 +47,15 @@ class Product(Enum):
     # Full disk
     RadF = 'ABI-L1b-RadF' # Radiances. Full disk. 15 Minutes
     # Mesoscale
-    CMIPM = 'ABI-L2-CMIPM' # Cloud & Moisture Imagery. Mesoscale. 30-60 seconds
-    MCMIPM = 'ABI-L2-MCMIPM' # Multi-Band Cloud & Moisture Imagery. Mesoscale.  30-60 seconds
-    RadM = 'ABI-L1b-RadM' # Radiances. Mesoscale. 30-60 seconds
+    CMIPM1 = 'ABI-L2-CMIPM1' # Cloud & Moisture Imagery. Mesoscale. 30-60 seconds
+    CMIPM2 = 'ABI-L2-CMIPM2' # Cloud & Moisture Imagery. Mesoscale. 30-60 seconds
+    CMIPM3 = 'ABI-L2-CMIPM3' # Cloud & Moisture Imagery. Mesoscale. 30-60 seconds
+    MCMIPM1 = 'ABI-L2-MCMIPM1' # Multi-Band Cloud & Moisture Imagery. Mesoscale.  30-60 seconds
+    MCMIPM2 = 'ABI-L2-MCMIPM2' # Multi-Band Cloud & Moisture Imagery. Mesoscale.  30-60 seconds
+    MCMIPM3 = 'ABI-L2-MCMIPM3' # Multi-Band Cloud & Moisture Imagery. Mesoscale.  30-60 seconds
+    RadM1 = 'ABI-L1b-RadM1' # Radiances. Mesoscale. 30-60 seconds
+    RadM2 = 'ABI-L1b-RadM2' # Radiances. Mesoscale. 30-60 seconds
+    RadM3 = 'ABI-L1b-RadM3' # Radiances. Mesoscale. 30-60 seconds
 
 
 class Band(IntEnum):
