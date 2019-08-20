@@ -53,3 +53,9 @@ class AFTP(Storage):
     async def download_dataset(self, filepath: str) -> netCDF4.Dataset:
         data = await self.download_data(filepath)
         return netCDF4.Dataset("in_memory_file", mode='r', memory=data)
+
+    async def append_data(self, data: bytes, filepath: str):
+        raise Exception('Not implemented: upload_stream')
+
+    async def append_stream(self, stream: io.BytesIO, filepath: str):
+        raise Exception('Not implemented: upload_stream')

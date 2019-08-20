@@ -1,4 +1,5 @@
 import os
+import io
 import netCDF4
 from cima.goes.storage._file_systems import Storage, storage_type, StorageInfo
 
@@ -39,3 +40,9 @@ class NFS(Storage):
     def get_dataset(self, filepath):
         data = self.download_data(filepath)
         return netCDF4.Dataset("in_memory_file", mode='r', memory=data)
+
+    def append_data(self, data: bytes, filepath: str):
+        raise Exception('Not implemented: upload_stream')
+
+    def append_stream(self, stream: io.BytesIO, filepath: str):
+        raise Exception('Not implemented: upload_stream')

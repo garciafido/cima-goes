@@ -56,3 +56,9 @@ class HTTP(Storage):
     def get_dataset(self, filepath: str) -> netCDF4.Dataset:
         resp = urllib.request.urlopen(get_gcs_url(filepath))
         return netCDF4.Dataset("in_memory_file", mode='r', memory=resp.read())
+
+    def append_data(self, data: bytes, filepath: str):
+        raise Exception('Not implemented: upload_stream')
+
+    def append_stream(self, stream: io.BytesIO, filepath: str):
+        raise Exception('Not implemented: upload_stream')

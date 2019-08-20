@@ -64,6 +64,12 @@ class GCS(GoesStorage):
     def upload_stream(self, stream: io.BytesIO, filepath: str):
         raise Exception('Not implemented: upload_stream')
 
+    def append_data(self, data: bytes, filepath: str):
+        raise Exception('Not implemented: upload_stream')
+
+    def append_stream(self, stream: io.BytesIO, filepath: str):
+        raise Exception('Not implemented: upload_stream')
+
     #
     # GoesStorage methods
     #

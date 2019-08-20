@@ -40,6 +40,14 @@ class Storage(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
+    def append_data(self, data: bytes, filepath: str):
+        pass
+
+    @abc.abstractmethod
+    def append_stream(self, stream: io.BytesIO, filepath: str):
+        pass
+
+    @abc.abstractmethod
     def upload_data(self, data: bytes, filepath: str):
         pass
 

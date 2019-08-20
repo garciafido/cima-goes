@@ -25,7 +25,10 @@ class FTP(Storage):
             ftp.login(user=self.user, passwd=self.password)
             return ftp.nlst(path)
         finally:
-            ftp.close()
+            try:
+                ftp.quit()
+            except:
+                ftp.close()
 
     def mkdir(self, path: str):
         ftp = ftplib.FTP()
@@ -34,18 +37,24 @@ class FTP(Storage):
             ftp.login(user=self.user, passwd=self.password)
             ftp.mkd(path)
         finally:
-            ftp.close()
+            try:
+                ftp.quit()
+            except:
+                ftp.close()
 
     def try_create_path(self, ftp, path):
         parts = path.split('/')
         if path[0] == '/':
             ftp.cwd('/')
-        for part in parts:
-            try:
-                ftp.cwd(part)
-            except Exception as e:
-                ftp.mkd(part)
-                ftp.cwd(part)
+        try:
+            for part in parts:
+                try:
+                    ftp.cwd(part)
+                except Exception as e:
+                    ftp.mkd(part)
+                    ftp.cwd(part)
+        except:
+            pass
 
     def upload_data(self, data: bytes, filepath: str, override: bool = True):
         stream = io.BytesIO()
@@ -58,10 +67,7 @@ class FTP(Storage):
             ftp.connect(host=self.host, port=self.port)
             ftp.login(user=self.user, passwd=self.password)
             path = os.path.dirname(os.path.abspath(filepath))
-            try:
-                ftp.mkd(path)
-            except Exception as e:
-                pass
+            self.try_create_path(ftp, path)
             stream.seek(0)
             if override:
                 try:
@@ -70,7 +76,10 @@ class FTP(Storage):
                     pass
             ftp.storbinary('STOR ' + filepath, stream)
         finally:
-            ftp.close()
+            try:
+                ftp.quit()
+            except:
+                ftp.close()
 
     def download_data(self, filepath: str) -> bytes:
         stream = self.download_stream(filepath)
@@ -86,7 +95,29 @@ class FTP(Storage):
             in_memory_file.seek(0)
             return in_memory_file
         finally:
-            ftp.close()
+            try:
+                ftp.quit()
+            except:
+                ftp.close()
+
+    def append_data(self, data: bytes, filepath: str):
+        stream = io.BytesIO()
+        stream.write(data)
+        self.append_stream(stream, filepath)
+
+    def append_stream(self, stream: io.BytesIO, filepath: str):
+        ftp = ftplib.FTP()
+        try:
+            ftp.connect(host=self.host, port=self.port)
+            ftp.login(user=self.user, passwd=self.password)
+            path = os.path.dirname(os.path.abspath(filepath))
+            stream.seek(0)
+            ftp.storbinary('APPE ' + filepath, stream)
+        finally:
+            try:
+                ftp.quit()
+            except:
+                ftp.close()
 
     def get_dataset(self, filepath: str) -> netCDF4.Dataset:
         data = self.download_data(filepath)
