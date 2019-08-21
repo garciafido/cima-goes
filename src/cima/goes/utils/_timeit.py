@@ -17,3 +17,19 @@ def timeit(method, log_name: str=None, acum_dict: dict=None):
                 print(f'{name}  {ms:.2f} ms')
         return result
     return timed
+
+
+def start_time():
+    return time.time()
+
+
+def diff_time(start):
+    current = time.time()
+    ms = (current - start) * 1000
+    if ms > 1000:
+        sec = ms / 1000.0
+        if sec > 60:
+            return f'{sec/60.0:.3f} min'
+        return f'{sec:.3f} sec.'
+
+    return f'{ms} ms'

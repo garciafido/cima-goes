@@ -9,7 +9,7 @@ from cima.goes.storage import StorageInfo
 from cima.goes.storage import mount_storage
 from cima.goes.storage._file_systems import Storage
 from cima.goes.tasks import run_concurrent, Task
-
+from cima.goes.utils import start_time, diff_time
 
 @dataclass
 class HoursRange:
@@ -49,17 +49,19 @@ def _process_day(process: ProcessCall,
     if storage is not None:
         kwargs['storage'] = storage
     results = []
-    # Log
+
+    # Process loop
+    current_time = start_time()
     if log_storage is not None:
         if isinstance(log_storage, StorageInfo):
             log_storage = mount_storage(log_storage)
-        dates_range = _get_resumed_range(dates_range, log_storage, log_path)
+        _log_processed(f'# BEGIN {date.isoformat()} at {datetime.datetime.now().isoformat()}',
+                       dates_range, log_storage, log_path)
     for hour_range in dates_range.hours_ranges:
         hours = [hour for hour in range(hour_range.from_hour, hour_range.to_hour + 1)]
         grouped_blobs_list = goes_storage.grouped_one_day_blobs(
             date.year, date.month, date.day, hours,
             bands)
-        logging_hour = None
         for grouped_blobs in grouped_blobs_list:
             minute = int(grouped_blobs.start[9:11])
             hour = int(grouped_blobs.start[7:9])
@@ -72,13 +74,10 @@ def _process_day(process: ProcessCall,
             )
             if result is not None:
                 results.append(result)
-            if log_storage is not None and logging_hour != hour:
-                if logging_hour is not None:
-                    _log_processed(f'{date.isoformat()}', dates_range, log_storage, log_path)
-                _log_processed(f'# BEGIN {date.isoformat()} at {datetime.datetime.now().isoformat()}', dates_range, log_storage, log_path)
-                logging_hour = hour
-        if logging_hour is not None:
-            _log_processed(f'{date.isoformat()}', dates_range, log_storage, log_path)
+    if log_storage is not None:
+        _log_processed(f'{date.isoformat()}', dates_range, log_storage, log_path)
+        _log_processed(f'# END at {datetime.datetime.now().isoformat()} ({diff_time(current_time)})',
+                       dates_range, log_storage, log_path)
     return results
 
 
@@ -88,7 +87,6 @@ def _get_resumed_range(
         log_path: str,
         ) -> DatesRange:
     filepath = f'{log_path}/{dates_range.name}.log'
-    print(filepath)
     try:
         data = log_storage.download_data(filepath)
         data = data.decode("utf-8").splitlines()
@@ -96,10 +94,10 @@ def _get_resumed_range(
         if len(data) > 0:
             data = data[-1]
             last_processed = datetime.datetime.fromisoformat(data)
-            print(last_processed)
+            dates_range.from_date = (last_processed + datetime.timedelta(days=1)).date()
+            print(f'Last processed {dates_range.name}:', last_processed)
         return dates_range
     except Exception as e:
-        print(filepath, e)
         init_str = f'# INIT {datetime.datetime.now().isoformat()}\n'
         log_storage.upload_data(bytes(init_str, 'utf-8'), filepath)
         return dates_range
@@ -112,7 +110,6 @@ def _log_processed(
         log_path: str,
         ) -> DatesRange:
     filepath = f'{log_path}/{dates_range.name}.log'
-    print(filepath)
     log_storage.append_data(bytes(text+'\n', 'utf-8'), filepath)
 
 
@@ -120,13 +117,13 @@ class BatchProcess(object):
     def __init__(self,
                  goes_storage: GoesStorage,
                  bands: List[ProductBand],
-                 date_ranges: List[DatesRange],
+                 dates_ranges: List[DatesRange],
                  log_storage: Storage = None,
                  log_base_path: str = '',
                  machine_id: str = '',
                  ):
         self.bands = bands
-        self.date_ranges = date_ranges
+        self.dates_ranges = dates_ranges
         self.goes_storage = goes_storage
         self.log_storage = log_storage
         self.machine_id = machine_id
@@ -143,39 +140,53 @@ class BatchProcess(object):
 
         tasks = []
         results = []
-        for date_range in self.date_ranges:
-            if workers > 1:
-                for date in dates_range(date_range):
-                    tasks.append(
-                        Task(
-                            _process_day,
+        for range in self.dates_ranges:
+
+            # Check if resume range
+            if self.log_storage is not None:
+                last_from = range.from_date
+                range = _get_resumed_range(range, self.log_storage, self.log_path)
+                if last_from < range.from_date:
+                    _log_processed(
+                        f'# RESUMED from {range.from_date} to {range.to_date} at {datetime.datetime.now().isoformat()}',
+                        range, self.log_storage, self.log_path)
+            if range.from_date > range.to_date:
+                _log_processed(
+                    f'# NOTHING TO DO from {range.from_date} to {range.to_date} at {datetime.datetime.now().isoformat()}',
+                    range, self.log_storage, self.log_path)
+            else:
+                if workers > 1:
+                    for date in dates_range(range):
+                        tasks.append(
+                            Task(
+                                _process_day,
+                                process,
+                                self.goes_storage.get_storage_info(),
+                                self.bands,
+                                date,
+                                range,
+                                *args,
+                                storage=None if storage is None else storage.get_storage_info(),
+                                log_storage=None if self.log_storage is None else self.log_storage.get_storage_info(),
+                                log_path=self.log_path,
+                                **kwargs)
+                        )
+                else:
+                    for date in dates_range(range):
+                        result = _process_day(
                             process,
-                            self.goes_storage.get_storage_info(),
+                            self.goes_storage,
                             self.bands,
                             date,
-                            date_range,
+                            range,
                             *args,
-                            storage=None if storage is None else storage.get_storage_info(),
-                            log_storage=None if self.log_storage is None else self.log_storage.get_storage_info(),
+                            storage=storage,
+                            log_storage=self.log_storage,
                             log_path=self.log_path,
-                            **kwargs)
-                    )
-            else:
-                for date in dates_range(date_range):
-                    result = _process_day(
-                        process,
-                        self.goes_storage,
-                        self.bands,
-                        date,
-                        date_range,
-                        *args,
-                        storage=storage,
-                        log_storage=self.log_storage,
-                        log_path=self.log_path,
-                        **kwargs
-                    )
-                    if result is not None:
-                        results.append(result)
+                            **kwargs
+                        )
+                        if result is not None:
+                            results.append(result)
 
         if tasks:
             return run_concurrent(tasks, workers)
