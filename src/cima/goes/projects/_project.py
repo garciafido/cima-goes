@@ -106,7 +106,7 @@ def _get_resumed_range(
         return dates_list
     except Exception as e:
         init_str = f'# INIT {datetime.datetime.now().isoformat()}\n'
-        log_storage.upload_data(bytes(init_str, 'utf-8'), filepath)
+        log_storage.append_data(bytes(init_str, 'utf-8'), filepath)
         return dates_list
 
 
