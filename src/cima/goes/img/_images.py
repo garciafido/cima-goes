@@ -84,7 +84,7 @@ def add_cultural(ax):
     ax.add_feature(states_provinces, edgecolor='white', linewidth=linewidth)
 
 
-def add_grid(ax, draw_labels=True):
+def add_grid(ax, draw_labels=False):
     linewidth = 1.25
     gl = ax.gridlines(linewidth=linewidth,
                       linestyle='dotted',
