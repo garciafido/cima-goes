@@ -278,7 +278,7 @@ def stream2cv(image_stream):
     return cv2.imdecode(np_image, cv2.IMREAD_COLOR)
 
 
-def cv2steam(cv_image):
+def cv2stream(cv_image):
     pil_image = cv2pil(cv_image)
     return pil2steam(pil_image)
 
