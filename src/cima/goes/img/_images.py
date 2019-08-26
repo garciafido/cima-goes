@@ -257,15 +257,16 @@ def get_pil_image(
 
 
 def pil2cv(pil_image: Image):
-    # return np.array(pil_image.convert('RGB'))[:, :, ::-1].copy()
-    return np.array(pil_image)[:, :, ::-1].copy()
+    return np.array(pil_image.convert('RGB'))[:, :, ::-1].copy()
+    # return np.array(pil_image)[:, :, ::-1].copy()
 
 
 def cv2pil(cv_image: Image):
-    return cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
+    img =  cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
+    return Image.fromarray(img)
 
 
-def pil2steam(pil_image):
+def pil2stream(pil_image):
     stream = io.BytesIO()
     pil_image.save(stream, 'PNG')
     stream.seek(0)
@@ -280,7 +281,7 @@ def stream2cv(image_stream):
 
 def cv2stream(cv_image):
     pil_image = cv2pil(cv_image)
-    return pil2steam(pil_image)
+    return pil2stream(pil_image)
 
 
 def stream2pil(image_stream) -> Image:
