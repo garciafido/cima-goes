@@ -169,6 +169,15 @@ def expand_region(region: LatLonRegion, lat, lon):
     )
 
 
+def contract_region(region: LatLonRegion, lat, lon):
+    return LatLonRegion(
+        lat_south=region.lat_south + lat,
+        lat_north=region.lat_north - lat,
+        lon_west=region.lon_west + lon,
+        lon_east=region.lon_east - lon,
+    )
+
+
 def get_lats_lons(dataset, indexes: RegionIndexes = None):
     dataset_key = get_dataset_key(dataset)
     if indexes is None:

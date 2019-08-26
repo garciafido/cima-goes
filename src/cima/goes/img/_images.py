@@ -55,14 +55,14 @@ def get_cropped_cv2_image(image, x: int, y: int, width, height):
 
 
 def get_clipped(image, image_region: LatLonRegion, clip: LatLonRegion):
-    image_shape = image.shape
-    pixels_per_lon = image_shape[0] / abs(image_region.lon_east-image_region.lon_west)
-    pixels_per_lat = image_shape[1] / abs(image_region.lat_south-image_region.lat_north)
-    x = int(pixels_per_lon * abs(image_region.lon_east-clip.lon_west))
+    image_height, image_width, _ = image.shape
+    pixels_per_lon = image_width / abs(image_region.lon_east-image_region.lon_west)
+    pixels_per_lat = image_height / abs(image_region.lat_south-image_region.lat_north)
+    x = int(pixels_per_lon * abs(image_region.lon_east-clip.lon_east))
     y = int(pixels_per_lat * abs(image_region.lat_north-clip.lat_north))
     width = int(pixels_per_lon * abs(clip.lon_east-clip.lon_west))
     height = int(pixels_per_lat * abs(clip.lat_south-clip.lat_north))
-    return image[x:min(x+width, image_shape[0]), y:min(y+height, image_shape[1])]
+    return image[y:min(y+height, image_height), x:min(x+width, image_width)]
 
 
 def add_cultural(ax):
@@ -84,15 +84,15 @@ def add_cultural(ax):
     ax.add_feature(states_provinces, edgecolor='white', linewidth=linewidth)
 
 
-def add_grid(ax, draw_labels=False):
+def add_grid(ax, draw_labels=False, step=2):
     linewidth = 1.25
     gl = ax.gridlines(linewidth=linewidth,
                       linestyle='dotted',
                       color='gray',
                       crs=ccrs.PlateCarree(),
                       draw_labels=draw_labels)
-    gl.xlocator = mticker.FixedLocator([x for x in range(-180, 180, 2)])
-    gl.ylocator = mticker.FixedLocator([x for x in range(-180, 180, 2)])
+    gl.xlocator = mticker.FixedLocator([x for x in range(-180, 180, step)])
+    gl.ylocator = mticker.FixedLocator([x for x in range(-180, 180, step)])
     gl.xlabels_top = False
     gl.ylabels_right = False
 
@@ -211,6 +211,7 @@ def get_image_stream(
         cmap=None, vmin=None, vmax=None,
         draw_cultural=False, draw_grid=False,
         title: str = None,
+        grid_step=1,
         trim_excess=0):
     image_inches = get_image_inches(data)
     fig = plt.figure()
@@ -224,7 +225,7 @@ def get_image_stream(
         if draw_cultural:
             add_cultural(ax)
         if draw_grid:
-            add_grid(ax)
+            add_grid(ax, step=grid_step)
         if title is not None:
             ax.title.set_text(title)
         ax.axis('off')
