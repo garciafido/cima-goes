@@ -265,10 +265,22 @@ def cv2pil(cv_image: Image):
     return cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
 
 
+def pil2steam(pil_image):
+    stream = io.BytesIO()
+    pil_image.save(stream, 'PNG')
+    stream.seek(0)
+    return stream
+
+
 def stream2cv(image_stream):
     image_stream.seek(0)
     np_image = np.asarray(bytearray(image_stream.read()), dtype="uint8")
     return cv2.imdecode(np_image, cv2.IMREAD_COLOR)
+
+
+def cv2steam(cv_image):
+    pil_image = cv2pil(cv_image)
+    return pil2steam(pil_image)
 
 
 def stream2pil(image_stream) -> Image:
