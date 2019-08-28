@@ -167,7 +167,7 @@ def save_image(image,
         if file_extension[0] == '.':
             format = file_extension[1:]
     figure = get_image_stream(image, lats, lons, lonlat_region, format=format, cmap=cmap, vmin=vmin, vmax=vmax,
-                    draw_cultural=draw_cultural, draw_grid=draw_grid, trim_excess=0)
+                    draw_cultural=draw_cultural, draw_grid=draw_grid, trim_excess=trim_excess)
     storage.upload_data(figure, filepath)
     figure.seek(0)
     return figure
