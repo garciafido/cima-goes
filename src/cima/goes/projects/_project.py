@@ -80,11 +80,15 @@ def _process_day(process: ProcessCall,
 
 
 def _get_dates_range(date_range: DatesRange):
-    dates = []
+    dates = {}
     current_date = date_range.from_date
     last_date = date_range.to_date
     while current_date <= last_date:
-        dates.append(current_date)
+        dates[current_date] = []
+        for hour_range in date_range.hours_ranges:
+            hours = [hour for hour in range(hour_range.from_hour, hour_range.to_hour + 1)]
+            dates[current_date].extend(hours)
+        dates[current_date] = set(dates[current_date])
         current_date = current_date + datetime.timedelta(days=1)
     return dates
 
@@ -95,19 +99,29 @@ def _get_resumed_range(
         log_path: str,
         ) -> DatesRange:
     filepath = f'{log_path}/{dates_range.name}.log'
-    dates_list = _get_dates_range(dates_range)
+    dates_and_hours = _get_dates_range(dates_range)
     try:
         data = log_storage.download_data(filepath)
         data = data.decode("utf-8").splitlines()
-        data = set([el.split('#')[0] for el in data if el[0] != '#'])
+        data_datetime = set([el.split('#')[0] for el in data if el[0] != '#'])
+        data_per_date = {}
         if len(data) > 0:
-            dates_list = [x for x in dates_list if x.isoformat() not in data]
-            print(f'To process {dates_range.name}:', dates_list)
-        return dates_list
+            for dt in data_datetime:
+                d, t = dt.split(' ')
+                if d not in data_per_date:
+                    data_per_date[d] = [t]
+                else:
+                    data_per_date[d].append(t)
+            for d, hours in data_per_date.items():
+                if d.isoformat() in dates_and_hours:
+                    for hour in data_per_date[d]:
+                        dates_and_hours[d.isoformat()].remove(int(hour))
+            print(f'To process {dates_range.name}:', dates_and_hours)
+        return dates_and_hours
     except Exception as e:
         init_str = f'# INIT {datetime.datetime.now().isoformat()}\n'
         log_storage.upload_data(bytes(init_str, 'utf-8'), filepath)
-        return dates_list
+        return dates_and_hours
 
 
 def _log_processed(
