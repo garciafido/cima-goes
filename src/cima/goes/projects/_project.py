@@ -37,6 +37,7 @@ def _process_day(process: ProcessCall,
                  goes_storage: Union[StorageInfo, GoesStorage],
                  bands: List[ProductBand],
                  date: datetime.date,
+                 hours: List[int],
                  dates_range: DatesRange,
                  *args,
                  storage: Storage = None,
@@ -54,10 +55,9 @@ def _process_day(process: ProcessCall,
 
     # Process loop
     current_time = start_time()
-    for hour_range in dates_range.hours_ranges:
-        hours = [hour for hour in range(hour_range.from_hour, hour_range.to_hour + 1)]
-        grouped_blobs_list = goes_storage.grouped_one_day_blobs(
-            date.year, date.month, date.day, hours,
+    for hour in hours:
+        grouped_blobs_list = goes_storage.grouped_one_hour_blobs(
+            date.year, date.month, date.day, hour,
             bands)
         for grouped_blobs in grouped_blobs_list:
             minute = int(grouped_blobs.start[9:11])
@@ -71,15 +71,15 @@ def _process_day(process: ProcessCall,
             )
             if result is not None:
                 results.append(result)
-    if _log_storage is not None:
-        if isinstance(_log_storage, StorageInfo):
-            _log_storage = mount_storage(_log_storage)
-        _log_processed(f'{date.isoformat()}# at {datetime.datetime.now().isoformat()} ({diff_time(current_time)})',
-                       dates_range, _log_storage, _log_path, _lock)
+        if _log_storage is not None:
+            if isinstance(_log_storage, StorageInfo):
+                _log_storage = mount_storage(_log_storage)
+            _log_processed(f'{date.isoformat()} {hour}# at {datetime.datetime.now().isoformat()} ({diff_time(current_time)})',
+                           dates_range, _log_storage, _log_path, _lock)
     return results
 
 
-def _get_dates_range(date_range: DatesRange):
+def _get_dates_and_hours(date_range: DatesRange):
     dates = {}
     current_date = date_range.from_date
     last_date = date_range.to_date
@@ -88,7 +88,6 @@ def _get_dates_range(date_range: DatesRange):
         for hour_range in date_range.hours_ranges:
             hours = [hour for hour in range(hour_range.from_hour, hour_range.to_hour + 1)]
             dates[current_date].extend(hours)
-        dates[current_date] = set(dates[current_date])
         current_date = current_date + datetime.timedelta(days=1)
     return dates
 
@@ -97,9 +96,9 @@ def _get_resumed_range(
         dates_range: DatesRange,
         log_storage: Storage,
         log_path: str,
-        ) -> DatesRange:
+        ) -> Dict[datetime.date, List[int]]:
     filepath = f'{log_path}/{dates_range.name}.log'
-    dates_and_hours = _get_dates_range(dates_range)
+    dates_and_hours = _get_dates_and_hours(dates_range)
     try:
         data = log_storage.download_data(filepath)
         data = data.decode("utf-8").splitlines()
@@ -160,24 +159,24 @@ class BatchProcess(object):
         lock = manager.Lock()
         for range in self.dates_ranges:
             # Check if resume range
-            dates_list = []
+            dates_and_hours = []
             if self.log_storage is not None:
                 last_from = range.from_date
-                dates_list = _get_resumed_range(range, self.log_storage, self.log_path)
-                if dates_list and last_from < dates_list[0]:
+                dates_and_hours = _get_resumed_range(range, self.log_storage, self.log_path)
+                if dates_and_hours and last_from <= max(dates_and_hours.keys()):
                     _log_processed(
-                        f'# RESUMED from {dates_list[0]} to {range.to_date} at {datetime.datetime.now().isoformat()}',
+                        f'# RESUMED from {last_from.isoformat()} to {range.to_date} at {datetime.datetime.now().isoformat()}',
                         range, self.log_storage, self.log_path, lock)
             else:
-                dates_list = _get_dates_range(range)
+                dates_and_hours = _get_dates_and_hours(range)
 
-            if not dates_list:
+            if not dates_and_hours:
                 _log_processed(
                     f'# NOTHING TO DO from {range.from_date} to {range.to_date} at {datetime.datetime.now().isoformat()}',
                     range, self.log_storage, self.log_path, lock)
             else:
                 if workers > 1:
-                    for date in dates_list:
+                    for date, hours in dates_and_hours.items():
                         tasks.append(
                             Task(
                                 _process_day,
@@ -185,6 +184,7 @@ class BatchProcess(object):
                                 self.goes_storage.get_storage_info(),
                                 self.bands,
                                 date,
+                                hours,
                                 range,
                                 *args,
                                 storage=None if storage is None else storage.get_storage_info(),
@@ -194,12 +194,13 @@ class BatchProcess(object):
                         **kwargs)
                         )
                 else:
-                    for date in dates_list:
+                    for date, hours in dates_and_hours.items():
                         result = _process_day(
                             process,
                             self.goes_storage,
                             self.bands,
                             date,
+                            hours,
                             range,
                             *args,
                             storage=storage,
