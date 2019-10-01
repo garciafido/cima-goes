@@ -76,6 +76,7 @@ def _process_day(process: ProcessCall,
                 _log_storage = mount_storage(_log_storage)
             _log_processed(f'{date.isoformat()} {hour}# at {datetime.datetime.now().isoformat()} ({diff_time(current_time)})',
                            dates_range, _log_storage, _log_path, _lock)
+            print(f'Completed {date.isoformat()} {hour} at {datetime.datetime.now().isoformat()} ({diff_time(current_time)})')
     return results
 
 
@@ -112,10 +113,10 @@ def _get_resumed_range(
                 else:
                     data_per_date[d].append(t)
             for d, hours in data_per_date.items():
-                if d.isoformat() in dates_and_hours:
+                date = datetime.date.fromisoformat(d)
+                if date in dates_and_hours:
                     for hour in data_per_date[d]:
-                        dates_and_hours[d.isoformat()].remove(int(hour))
-            print(f'To process {dates_range.name}:', dates_and_hours)
+                        dates_and_hours[date].remove(int(hour))
         return dates_and_hours
     except Exception as e:
         init_str = f'# INIT {datetime.datetime.now().isoformat()}\n'
