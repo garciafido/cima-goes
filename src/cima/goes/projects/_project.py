@@ -12,6 +12,7 @@ from cima.goes.storage._file_systems import Storage
 from cima.goes.tasks import run_concurrent, Task
 from cima.goes.utils import start_time, diff_time
 
+
 @dataclass
 class HoursRange:
     from_hour: int
@@ -119,7 +120,8 @@ def _get_resumed_range(
                         dates_and_hours[date].remove(int(hour))
         return dates_and_hours
     except Exception as e:
-        init_str = f'# INIT {datetime.datetime.now().isoformat()}\n'
+        msg = str(e).replace('\n', '# ')
+        init_str = f'# INIT {datetime.datetime.now().isoformat()} {msg}\n'
         log_storage.upload_data(bytes(init_str, 'utf-8'), filepath)
         return dates_and_hours
 
