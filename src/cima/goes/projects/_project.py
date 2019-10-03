@@ -114,7 +114,8 @@ def _get_resumed_range(
                 else:
                     data_per_date[d].append(t)
             for d, hours in data_per_date.items():
-                date = datetime.date.fromisoformat(d)
+                year, month, day = map(int, d.split('-'))
+                date = datetime.date(year=year, month=month, day=day)
                 if date in dates_and_hours:
                     for hour in data_per_date[d]:
                         dates_and_hours[date].remove(int(hour))
