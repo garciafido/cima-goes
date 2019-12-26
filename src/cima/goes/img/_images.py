@@ -133,7 +133,7 @@ def pcolormesh(ax: Axes, image, lons, lats, cmap=None, vmin=None, vmax=None):
         #               color=color_tuple, linewidth=0)
         ax.pcolormesh(lons, lats, image_m[:, :, 0], color=color_tuple)
     else:
-        ax.pcolormesh(lons, lats, image_m, latlon=True, cmap=cmap, vmin=vmin, vmax=vmax)
+        ax.pcolormesh(lons, lats, image_m, cmap=cmap, vmin=vmin, vmax=vmax)
 
 
 def set_extent(ax: Axes, lonlat_region: LatLonRegion, trim_excess=0):
