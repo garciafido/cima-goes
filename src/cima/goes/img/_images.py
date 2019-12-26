@@ -126,6 +126,7 @@ def make_color_tuple(rgb):
 
 def pcolormesh(ax: Axes, image, lons, lats, cmap=None, vmin=None, vmax=None):
     image_m = np.ma.masked_where(np.isnan(image), image)
+    image_m = np.ma.masked_invalid(image_m)
     if len(image.shape) == 3:
         color_tuple = make_color_tuple(image_m)
         # ax.pcolormesh(lons, lats, np.zeros_like(lons),
