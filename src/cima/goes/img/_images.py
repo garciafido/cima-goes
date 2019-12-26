@@ -127,12 +127,12 @@ def make_color_tuple(rgb):
 def pcolormesh(ax: Axes, image, lons, lats, cmap=None, vmin=None, vmax=None):
     image_m = np.ma.masked_where(np.isnan(image), image)
     if len(image.shape) == 3:
-        color_tuple = make_color_tuple(image)
+        color_tuple = make_color_tuple(image_m)
         # ax.pcolormesh(lons, lats, np.zeros_like(lons),
         #               color=color_tuple, linewidth=0)
-        ax.pcolormesh(lons, lats, image[:, :, 0], color=color_tuple)
+        ax.pcolormesh(lons, lats, image_m[:, :, 0], color=color_tuple)
     else:
-        ax.pcolormesh(lons, lats, image, latlon=True, cmap=cmap, vmin=vmin, vmax=vmax)
+        ax.pcolormesh(lons, lats, image_m, latlon=True, cmap=cmap, vmin=vmin, vmax=vmax)
 
 
 def set_extent(ax: Axes, lonlat_region: LatLonRegion, trim_excess=0):
