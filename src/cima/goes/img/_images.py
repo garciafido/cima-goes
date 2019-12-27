@@ -126,7 +126,7 @@ def make_color_tuple(rgb):
 
 def pcolormesh(ax: Axes, image, lons, lats, cmap=None, vmin=None, vmax=None):
     image_m = np.ma.masked_invalid(np.atleast_2d(image))
-    if True: #len(image.shape) == 3:
+    if len(image.shape) == 3:
         color_tuple = make_color_tuple(image_m)
         # ax.pcolormesh(lons, lats, np.zeros_like(lons),
         #               color=color_tuple, linewidth=0)
@@ -204,6 +204,15 @@ def getfig(image,
         plt.close()
 
 
+def interpolate_invalid(data):
+    data = np.ma.masked_invalid(data)
+    data = data.filled(np.nan)
+    nans = np.isnan(data)
+    x = lambda z: z.nonzero()[0]
+    data[nans] = np.interp(x(nans), x(~nans), data[~nans])
+    return data
+
+
 def get_image_stream(
         data,
         lats, lons,
@@ -230,6 +239,9 @@ def get_image_stream(
         if title is not None:
             ax.title.set_text(title)
         ax.axis('off')
+
+        lons = interpolate_invalid(lons)
+        lats = interpolate_invalid(lats)
 
         pcolormesh(ax, data, lons, lats, cmap=cmap, vmin=vmin, vmax=vmax)
         fig.add_axes(ax, projection=ccrs.PlateCarree())
