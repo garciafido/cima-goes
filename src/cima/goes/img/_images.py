@@ -240,6 +240,7 @@ def get_image_stream(
             ax.title.set_text(title)
         ax.axis('off')
 
+        # Interpolate invalid values to fix pcolormesh errors
         lons = interpolate_invalid(lons)
         lats = interpolate_invalid(lats)
 
