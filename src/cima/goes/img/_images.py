@@ -125,12 +125,17 @@ def make_color_tuple(rgb):
 
 
 def pcolormesh(ax: Axes, image, lons, lats, cmap=None, vmin=None, vmax=None):
-    image_m = np.ma.masked_invalid(np.atleast_2d(image))
+    # image_m = np.ma.masked_invalid(np.atleast_2d(image))
+
+    # Interpolate invalid values to fix pcolormesh errors
+    lons = interpolate_invalid(lons)
+    lats = interpolate_invalid(lats)
+
     if len(image.shape) == 3:
-        color_tuple = make_color_tuple(image_m)
+        color_tuple = make_color_tuple(image)
         # ax.pcolormesh(lons, lats, np.zeros_like(lons),
         #               color=color_tuple, linewidth=0)
-        ax.pcolormesh(lons, lats, image_m[:, :, 0], color=color_tuple)
+        ax.pcolormesh(lons, lats, image[:, :, 0], color=color_tuple)
     else:
         ax.pcolormesh(lons, lats, image_m, cmap=cmap, vmin=vmin, vmax=vmax)
 
@@ -195,7 +200,6 @@ def getfig(image,
             add_grid(ax)
         else:
             ax.axis('off')
-
         pcolormesh(ax, image, lons, lats, cmap=cmap, vmin=vmin, vmax=vmax)
         fig.add_axes(ax, projection=ccrs.PlateCarree())
         return fig
@@ -239,11 +243,6 @@ def get_image_stream(
         if title is not None:
             ax.title.set_text(title)
         ax.axis('off')
-
-        # Interpolate invalid values to fix pcolormesh errors
-        lons = interpolate_invalid(lons)
-        lats = interpolate_invalid(lats)
-
         pcolormesh(ax, data, lons, lats, cmap=cmap, vmin=vmin, vmax=vmax)
         fig.add_axes(ax, projection=ccrs.PlateCarree())
         buffer = io.BytesIO()
