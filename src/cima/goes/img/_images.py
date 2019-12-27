@@ -126,18 +126,13 @@ def make_color_tuple(rgb):
 
 def pcolormesh(ax: Axes, image, lons, lats, cmap=None, vmin=None, vmax=None):
     # image_m = np.ma.masked_invalid(np.atleast_2d(image))
-
-    # Interpolate invalid values to fix pcolormesh errors
-    lons = interpolate_invalid(lons)
-    lats = interpolate_invalid(lats)
-
     if len(image.shape) == 3:
         color_tuple = make_color_tuple(image)
         # ax.pcolormesh(lons, lats, np.zeros_like(lons),
         #               color=color_tuple, linewidth=0)
         ax.pcolormesh(lons, lats, image[:, :, 0], color=color_tuple)
     else:
-        ax.pcolormesh(lons, lats, image_m, cmap=cmap, vmin=vmin, vmax=vmax)
+        ax.pcolormesh(lons, lats, image, cmap=cmap, vmin=vmin, vmax=vmax)
 
 
 def set_extent(ax: Axes, lonlat_region: LatLonRegion, trim_excess=0):
@@ -230,6 +225,9 @@ def get_image_stream(
     image_inches = get_image_inches(data)
     fig = plt.figure()
     try:
+        # Interpolate invalid values to fix pcolormesh errors
+        lons = interpolate_invalid(lons)
+        lats = interpolate_invalid(lats)
         fig.set_size_inches(image_inches.x, image_inches.y)
         ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
         ax.set_axis_off()
