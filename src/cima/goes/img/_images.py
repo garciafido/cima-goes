@@ -206,8 +206,8 @@ def interpolate_invalid(data):
     data = np.ma.masked_invalid(data)
     data = data.filled(np.nan)
     nans = np.isnan(data)
-    x = lambda z: z.nonzero()[0]
-    data[nans] = np.interp(x(nans), x(~nans), data[~nans])
+    f_nz = lambda x: x.nonzero()[0]
+    data[nans] = np.interp(f_nz(nans), f_nz(~nans), data[~nans])
     return data
 
 
