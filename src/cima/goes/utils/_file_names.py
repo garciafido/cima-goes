@@ -1,6 +1,6 @@
 import datetime
 from dataclasses import dataclass
-from enum import IntEnum, Enum
+from enum import IntEnum, Enum, unique
 import re
 
 # File neme pattern:
@@ -19,8 +19,14 @@ import re
 # http://edc.occ-data.org/goes16/getdata/
 
 
+@unique
 class Product(Enum):
-    _init_ = 'value __doc__'
+    def __new__(cls, value, doc=None):
+        self = object.__new__(cls)  # calling super().__new__(value) here would fail
+        self._value_ = value
+        if doc is not None:
+            self.__doc__ = doc
+        return self
 
     ACMF = 'ABI-L2-ACMF', 'Clear Sky Masks'
     ACHAF = 'ABI-L2-ACHAF', 'Cloud Top Height',
@@ -54,8 +60,14 @@ class Product(Enum):
     RadM = 'ABI-L1b-RadM',  'Radiances. Mesoscale. 30-60 seconds'
 
 
+@unique
 class Band(IntEnum):
-    _init_ = 'value __doc__'
+    def __new__(cls, value, doc=None):
+        self = int.__new__(cls, value)  # calling super().__new__(value) here would fail
+        self._value_ = value
+        if doc is not None:
+            self.__doc__ = doc
+        return self
 
     BLUE = 1, '1: Blue'
     RED = 2, '2: Red'
