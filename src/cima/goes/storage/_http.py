@@ -7,7 +7,7 @@ import urllib
 from cima.goes.storage._blobs import GroupedBandBlobs, BandBlobs, GoesBlob
 from cima.goes.storage._file_systems import StorageInfo, storage_type
 from cima.goes.storage._file_systems import Storage
-from cima.goes.utils._file_names import ProductBand, GOES_PUBLIC_BUCKET, ANY_MODE, Product, get_gcs_url
+from cima.goes.utils._file_names import ProductBand, GOES_PUBLIC_BUCKET, ANY_MODE, Product, get_gcs_url, get_browse_url
 
 
 class HTTP(Storage):
@@ -48,7 +48,7 @@ class HTTP(Storage):
         raise Exception('Not implemented: mkdir')
 
     def download_data(self, filepath: str) -> bytes:
-        resp = urllib.request.urlopen(get_gcs_url(filepath))
+        resp = urllib.request.urlopen(get_browse_url(filepath))
         return resp.read()
 
     def download_stream(self, filepath: str) -> io.BytesIO:

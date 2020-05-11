@@ -128,3 +128,12 @@ GOES_PUBLIC_BUCKET = 'gcp-public-data-goes-16'
 def get_gcs_url(filepath: str):
     return f'https://storage.cloud.google.com/{GOES_PUBLIC_BUCKET}/{filepath}'
 
+
+def get_browse_url(filepath: str):
+    parts = filepath.split('_')
+    product = '-'.join(parts[1].split('-')[:-1])
+    year = parts[3][1:5]
+    day_of_year = parts[3][6:9]
+    hour = parts[3][10:12]
+    return f'https://storage.cloud.google.com/{GOES_PUBLIC_BUCKET}/{product}/{year}/{day_of_year}/{hour}/{filepath}'
+
