@@ -48,7 +48,8 @@ class HTTP(Storage):
         raise Exception('Not implemented: mkdir')
 
     def download_data(self, filepath: str) -> bytes:
-        raise Exception('Not implemented: mkdir')
+        resp = urllib.request.urlopen(get_gcs_url(filepath))
+        return resp.read()
 
     def download_stream(self, filepath: str) -> io.BytesIO:
         raise Exception('Not implemented: mkdir')
