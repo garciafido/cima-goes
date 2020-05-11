@@ -20,55 +20,59 @@ import re
 
 
 class Product(Enum):
-    ACMF = 'ABI-L2-ACMF' # Clear Sky Masks
-    ACHAF = 'ABI-L2-ACHAF' # Cloud Top Height
-    ACHTF = 'ABI-L2-ACHTF' # Cloud Top Temperature
-    ACTPF = 'ABI-L2-ACTPF' # Cloud Top Phase
-    ADPF = 'ABI-L2-ADPF' # Aerosol Detection (including Smoke and Dust)
-    AODF = 'ABI-L2-AODF' # Aerosol Optical Depth
-    CMIPF = 'ABI-L2-CMIPF' # Cloud and Moisture Image Product – Full Disk
-    MCMIPF = 'ABI-L2-MCMIPF'
-    MCMIPC = 'ABI-L2-MCMIPC'
-    CODF = 'ABI-L2-CODF' # Cloud Optical Depth
-    CPSF = 'ABI-L2-CPSF' # Cloud Particle Size Distribution
-    DSIF = 'ABI-L2-DSIF' # Derived Stability Indices
-    DMWF = 'ABI-L2-DMWF' # Derived Motion Winds
-    FDCF = 'ABI-L2-FDCF' # Fire / Hot Spot Characterization
-    FSCF = 'ABI-L2-FSCF' # Snow Cover
-    LSTF = 'ABI-L2-LSTF' # Land Surface Temperature (Skin)
-    RRQPEF = 'ABI-L2-RRQPEF' # Rainfall Rate /QPE
-    SSTF = 'ABI-L2-SSTF' # Sea Surface Temperature (Skin)
-    TPWF = 'ABI-L2-TPWF' # Total Precipitable Water
-    VAAF = 'ABI-L2-VAAF' # Volcanic Ash
-    LCFA = 'GLM-L2-LCFA'
+    _init_ = 'value __doc__'
+
+    ACMF = 'ABI-L2-ACMF', 'Clear Sky Masks'
+    ACHAF = 'ABI-L2-ACHAF', 'Cloud Top Height',
+    ACHTF = 'ABI-L2-ACHTF', 'Cloud Top Temperature',
+    ACTPF = 'ABI-L2-ACTPF', 'Cloud Top Phase',
+    ADPF = 'ABI-L2-ADPF', 'Aerosol Detection (including Smoke and Dust)',
+    AODF = 'ABI-L2-AODF', 'Aerosol Optical Depth',
+    CMIPF = 'ABI-L2-CMIPF', 'Cloud and Moisture Image Product – Full Disk',
+    MCMIPF = 'ABI-L2-MCMIPF', 'ABI-L2-MCMIPF',
+    MCMIPC = 'ABI-L2-MCMIPC', 'ABI-L2-MCMIPC',
+    CODF = 'ABI-L2-CODF', 'Cloud Optical Depth',
+    CPSF = 'ABI-L2-CPSF', 'Cloud Particle Size Distribution',
+    DSIF = 'ABI-L2-DSIF', 'Derived Stability Indices',
+    DMWF = 'ABI-L2-DMWF', 'Derived Motion Winds',
+    FDCF = 'ABI-L2-FDCF', 'Fire / Hot Spot Characterization',
+    FSCF = 'ABI-L2-FSCF', 'Snow Cover',
+    LSTF = 'ABI-L2-LSTF', 'Land Surface Temperature (Skin)',
+    RRQPEF = 'ABI-L2-RRQPEF', 'Rainfall Rate /QPE',
+    SSTF = 'ABI-L2-SSTF', 'Sea Surface Temperature (Skin)',
+    TPWF = 'ABI-L2-TPWF', 'Total Precipitable Water',
+    VAAF = 'ABI-L2-VAAF', 'Volcanic Ash',
+    LCFA = 'GLM-L2-LCFA', 'GLM-L2-LCFA'
     # Conus
-    CMIPC = 'ABI-L2-CMIPC' # Cloud & Moisture Imagery. Conus. 5 Minutes
-    RadC = 'ABI-L1b-RadC' # Radiances. Conus. 5 Minutes
+    CMIPC = 'ABI-L2-CMIPC', 'Cloud & Moisture Imagery. Conus. 5 Minutes'
+    RadC = 'ABI-L1b-RadC', 'Radiances. Conus. 5 Minutes'
     # Full disk
-    RadF = 'ABI-L1b-RadF' # Radiances. Full disk. 15 Minutes
+    RadF = 'ABI-L1b-RadF', 'Radiances. Full disk. 15 Minutes'
     # Mesoscale
-    CMIPM = 'ABI-L2-CMIPM' # Cloud & Moisture Imagery. Mesoscale. 30-60 seconds
-    MCMIPM = 'ABI-L2-MCMIPM' # Multi-Band Cloud & Moisture Imagery. Mesoscale.  30-60 seconds
-    RadM = 'ABI-L1b-RadM' # Radiances. Mesoscale. 30-60 seconds
+    CMIPM = 'ABI-L2-CMIPM',  'Cloud & Moisture Imagery. Mesoscale. 30-60 seconds'
+    MCMIPM = 'ABI-L2-MCMIPM',  'Multi-Band Cloud & Moisture Imagery. Mesoscale.  30-60 seconds'
+    RadM = 'ABI-L1b-RadM',  'Radiances. Mesoscale. 30-60 seconds'
 
 
 class Band(IntEnum):
-    BLUE = 1
-    RED = 2
-    VEGGIE = 3
-    CIRRUS = 4
-    SNOW_ICE = 5
-    CLOUD_PARTICLE_SIZE = 6
-    SHORTWAVE_WINDOW = 7
-    UPPER_LEVEL_TROPOSPHERIC_WATER_VAPOR = 8
-    MID_LEVEL_TROPOSPHERIC_WATER_VAPOR = 9
-    LOWER_LEVEL_WATER_VAPOR = 10
-    CLOUD_TOP_PHASE = 11
-    OZONE = 12
-    CLEAN_LONGWAVE_WINDOW = 13
-    IR_LONGWAVE_WINDOW = 14
-    DIRTY_LONGWAVE_WINDOW = 15
-    CO2_LONGWAVE_INFRARED = 16
+    _init_ = 'value __doc__'
+
+    BLUE = 1, '1: Blue'
+    RED = 2, '2: Red'
+    VEGGIE = 3, '3: Veggie'
+    CIRRUS = 4, '4: Cirrus'
+    SNOW_ICE = 5, '5: Snow ice'
+    CLOUD_PARTICLE_SIZE = 6, '6: Cloud particle size'
+    SHORTWAVE_WINDOW = 7, '7: Shortwave window'
+    UPPER_LEVEL_TROPOSPHERIC_WATER_VAPOR = 8, '8: Upper level tropospheric water vapor'
+    MID_LEVEL_TROPOSPHERIC_WATER_VAPOR = 9, '9: Mid level tropospheric water vapor'
+    LOWER_LEVEL_WATER_VAPOR = 10, '10: Lower level water vapor'
+    CLOUD_TOP_PHASE = 11, '11: Cloud top phase'
+    OZONE = 12, '12: Ozone'
+    CLEAN_LONGWAVE_WINDOW = 13, '13: Clean longwave window'
+    IR_LONGWAVE_WINDOW = 14, '14: IR longwave window'
+    DIRTY_LONGWAVE_WINDOW = 15, '15: Dirty longwave window'
+    CO2_LONGWAVE_INFRARED = 16, '16: CO2 longwave infrared'
 
 
 @dataclass
