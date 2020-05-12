@@ -8,7 +8,7 @@ from distutils.core import setup
 
 setup(
     name='cima.goes',
-    version='1.1.b82',
+    version='1.1.b83',
     description='GOES-16 File Processing',
     author='Fido Garcia',
     author_email='garciafido@gmail.com',
@@ -26,6 +26,8 @@ setup(
         'aioftp==0.16.0',
         'aiofiles==0.5.0',
         'pyproj==2.6.1.post1',
+        'opencv-python==4.2.0.34',
+        'Cartopy==0.18.0',
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
