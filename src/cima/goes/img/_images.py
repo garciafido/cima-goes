@@ -15,6 +15,7 @@ from PIL import Image
 
 
 LOCAL_BASE_PATH = os.path.dirname(os.path.abspath(__file__))
+DUMMY_DPI = 10000
 
 
 def _resize(image, new_size):
@@ -147,9 +148,8 @@ class ImageResolution:
 
 
 def get_image_inches(image):
-    dummy_dpi = 100
     x, y = image.shape[:2]
-    return ImageResolution(dummy_dpi, x / dummy_dpi, y / dummy_dpi)
+    return ImageResolution(DUMMY_DPI, x / DUMMY_DPI, y / DUMMY_DPI)
 
 
 def save_image(image,
@@ -213,16 +213,20 @@ def interpolate_invalid(data):
 
 def get_image_stream(
         data,
-        lats, lons,
+        lats,
+        lons,
         region: LatLonRegion = None,
         format='png',
-        cmap=None, vmin=None, vmax=None,
-        draw_cultural=False, draw_grid=False,
+        cmap=None,
+        vmin=None,
+        vmax=None,
+        draw_cultural=False,
+        draw_grid=False,
         title: str = None,
         grid_step=1,
         trim_excess=0):
     image_inches = get_image_inches(data)
-    fig = plt.figure()
+    fig = plt.figure(frameon=False)
     try:
         # Interpolate invalid values to fix pcolormesh errors
         lons = interpolate_invalid(lons)
