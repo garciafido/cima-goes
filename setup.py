@@ -25,6 +25,7 @@ setup(
         'google-cloud-storage==1.28.1',
         'aioftp==0.16.0',
         'aiofiles==0.5.0',
+        'pyproj==2.6.1.post1',
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

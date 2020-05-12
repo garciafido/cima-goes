@@ -28,6 +28,8 @@ class NFS(Storage):
 
     def upload_data(self, data, filepath):
         directory = os.path.dirname(filepath)
+        if not directory:
+            directory = './'
         if not os.path.exists(directory):
             os.makedirs(directory)
         with open(filepath, mode='w+b') as f:

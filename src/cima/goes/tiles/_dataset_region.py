@@ -41,6 +41,7 @@ class DatasetRegion:
     sat_band_key: SatBandKey
     region: LatLonRegion
     indexes: RegionIndexes
+    product_bands: List[Dict[str, str]]
     # shape: Tuple[int, int]
 
 
@@ -83,9 +84,13 @@ def fill_bands_info(goes_storage: GoesStorage, lat_lon_region: LatLonRegion, reg
         dataset = get_one_dataset(goes_storage, band, year, month, day, hour)
         sat_band_key = get_dataset_key(dataset)
         key = band_key_as_string(sat_band_key)
+        product_band = {'product': band.product.__doc__, 'band': band.band.__doc__}
         if key not in region_indexes_dict:
             dataset_region = find_dataset_region(dataset, lat_lon_region)
+            dataset_region.product_bands = [product_band]
             region_indexes_dict[band_key_as_string(dataset_region.sat_band_key)] = dataset_region
+        else:
+            region_indexes_dict[key].product_bands.append(product_band)
 
 
 def load_tiles(storage: Storage, filepath) -> TilesDict:
@@ -132,6 +137,7 @@ def region_data_from_dict(bands_region_dict: dict) -> RegionData:
             sat_band_key=SatBandKey(**v['sat_band_key']),
             region=LatLonRegion(**v['region']),
             indexes=RegionIndexes(**v['indexes']),
+            product_bands=None
         )
     return bands_region
 
@@ -226,7 +232,8 @@ def find_dataset_region(dataset, region: LatLonRegion, major_order=default_major
     return DatasetRegion(
         sat_band_key=sat_band_key,
         region=region,
-        indexes=indexes
+        indexes=indexes,
+        product_bands=None
     )
 
 
