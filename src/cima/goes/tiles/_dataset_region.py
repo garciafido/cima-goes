@@ -206,9 +206,53 @@ def get_data(dataset, indexes: RegionIndexes = None, variable: str = None):
         elif 'Rad' in dataset.variables:
             variable = 'Rad'
     if indexes is None:
-        return dataset.variables[variable][:,:]
+        data = dataset.variables[variable][:,:]
     else:
-        return dataset.variables[variable][indexes.y_min : indexes.y_max, indexes.x_min : indexes.x_max]
+        data = dataset.variables[variable][indexes.y_min : indexes.y_max, indexes.x_min : indexes.x_max]
+    data.units = dataset.variables[variable].units
+    data.long_name = dataset.variables[variable].long_name
+    data.name = variable
+    return data
+
+
+def save_netcdf(filename: str, dataset, indexes: RegionIndexes = None, variable: str = None):
+    if variable is None:
+        if 'CMI' in dataset.variables:
+            variable = 'CMI'
+        elif 'Rad' in dataset.variables:
+            variable = 'Rad'
+
+    data = get_data(dataset, indexes, variable)
+
+    lats, lons = get_lats_lons(dataset, indexes)
+
+    clipped_dataset = Dataset(filename, 'w', format='NETCDF4')
+    clipped_dataset.createDimension('x', data.shape[0])
+    clipped_dataset.createDimension('y', data.shape[1])
+
+    # create latitude axis
+    new_lats = clipped_dataset.createVariable('lats', lats.dtype, ('x', 'y'))
+    new_lats.standard_name = 'latitude'
+    new_lats.long_name = 'latitude'
+    new_lats.units = 'degrees_north'
+    new_lats.axis = 'Y'
+    new_lats[:,:] = lats[:,:]
+
+    # create longitude axis
+    new_lons = clipped_dataset.createVariable('lons', lons.dtype, ('x', 'y'))
+    new_lons.standard_name = 'longitude'
+    new_lons.long_name = 'longitude'
+    new_lons.units = 'degrees_east'
+    new_lons.axis = 'X'
+    new_lons[:,:] = lons[:,:]
+
+    # create variable array
+    new_data = clipped_dataset.createVariable(data.name, data.dtype, ('x', 'y'))
+    new_data.long_name = data.long_name
+    new_data.units = data.units
+    new_data[:,:] = data[:,:]
+
+    clipped_dataset.close()
 
 
 def get_dataset_key(dataset: Dataset) -> SatBandKey:
