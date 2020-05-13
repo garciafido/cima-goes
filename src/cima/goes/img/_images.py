@@ -2,6 +2,7 @@ import io
 import os
 import cv2
 from dataclasses import dataclass
+from typing import Tuple
 import numpy as np
 import cartopy
 import cartopy.crs as ccrs
@@ -15,7 +16,7 @@ from PIL import Image
 
 
 LOCAL_BASE_PATH = os.path.dirname(os.path.abspath(__file__))
-DUMMY_DPI = 10000
+DUMMY_DPI = 1000
 
 
 def _resize(image, new_size):
@@ -135,9 +136,9 @@ def pcolormesh(ax: Axes, image, lons, lats, cmap=None, vmin=None, vmax=None):
         ax.pcolormesh(lons, lats, image, cmap=cmap, vmin=vmin, vmax=vmax)
 
 
-def set_extent(ax: Axes, lonlat_region: LatLonRegion, trim_excess=0):
+def set_extent(ax: Axes, lonlat_region: LatLonRegion, trim_excess=0, projection=ccrs.PlateCarree()):
     extent = get_tile_extent(lonlat_region, trim_excess=trim_excess)
-    ax.set_extent(extent, crs=ccrs.PlateCarree())
+    ax.set_extent(extent, crs=projection)
 
 
 @dataclass
@@ -149,7 +150,9 @@ class ImageResolution:
 
 def get_image_inches(image):
     x, y = image.shape[:2]
-    return ImageResolution(DUMMY_DPI, x / DUMMY_DPI, y / DUMMY_DPI)
+    # correction = (1.291, 1.298)
+    correction = (1.0, 1.0)
+    return ImageResolution(DUMMY_DPI, x / float(DUMMY_DPI) * correction[0], y / float(DUMMY_DPI) * correction[1])
 
 
 def save_image(image,
@@ -177,6 +180,7 @@ def getfig(image,
            region: LatLonRegion,
            lats, lons,
            format='png',
+           projection=ccrs.PlateCarree(),
            cmap=None, vmin=None, vmax=None,
            draw_cultural=False, draw_grid=False,
            trim_excess=0):
@@ -184,9 +188,12 @@ def getfig(image,
     fig = plt.figure(frameon=False)
     try:
         fig.set_size_inches(image_inches.x, image_inches.y)
-        ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
+        if projection is not None:
+            ax = fig.add_subplot(1, 1, 1, projection=projection)
+        else:
+            ax = fig.add_subplot(1, 1, 1)
         ax.set_axis_off()
-        set_extent(ax, region, trim_excess)
+        set_extent(ax, region, trim_excess, projection=projection)
 
         if draw_cultural:
             add_cultural(ax)
@@ -195,7 +202,10 @@ def getfig(image,
         else:
             ax.axis('off')
         pcolormesh(ax, image, lons, lats, cmap=cmap, vmin=vmin, vmax=vmax)
-        fig.add_axes(ax, projection=ccrs.PlateCarree())
+        if projection is not None:
+            fig.add_axes(ax, projection=projection)
+        else:
+            fig.add_axes(ax)
         return fig
     finally:
         # fig.clear()
@@ -216,6 +226,7 @@ def get_image_stream(
         lats,
         lons,
         region: LatLonRegion = None,
+        projection=ccrs.PlateCarree(),
         format='png',
         cmap=None,
         vmin=None,
@@ -231,12 +242,15 @@ def get_image_stream(
         # Interpolate invalid values to fix pcolormesh errors
         lons = interpolate_invalid(lons)
         lats = interpolate_invalid(lats)
-        fig.set_size_inches(image_inches.x, image_inches.y)
-        ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
-        ax.set_axis_off()
-        if region is not None:
-            set_extent(ax, region, trim_excess)
 
+        if projection is not None:
+            ax = fig.add_subplot(1, 1, 1, projection=projection)
+            if region is not None:
+                set_extent(ax, region, trim_excess, projection=projection)
+        else:
+            ax = fig.add_subplot(1, 1, 1)
+        ax.set_axis_off()
+        fig.set_size_inches(image_inches.x, image_inches.y)
         if draw_cultural:
             add_cultural(ax)
         if draw_grid:
@@ -244,10 +258,16 @@ def get_image_stream(
         if title is not None:
             ax.title.set_text(title)
         ax.axis('off')
+
         pcolormesh(ax, data, lons, lats, cmap=cmap, vmin=vmin, vmax=vmax)
-        fig.add_axes(ax, projection=ccrs.PlateCarree())
+
+        if projection is not None:
+            fig.add_axes(ax, projection=projection)
+        else:
+            fig.add_axes(ax)
+
         buffer = io.BytesIO()
-        plt.savefig(buffer, format=format, dpi=image_inches.dpi, bbox_inches='tight', pad_inches=0)
+        res = plt.savefig(buffer, format=format, dpi=image_inches.dpi, bbox_inches='tight', pad_inches=0)
         buffer.seek(0)
         return buffer
     finally:
