@@ -16,6 +16,12 @@ Installation
 
     $ pip install --upgrade cima.goes
 
+
+Examples
+--------
+
+https://github.com/garciafido/cima-goes-examples
+
 .. _CIMA GOES: https://pypi.org/project/cima.goes/
 
 .. |pypibq| image:: https://img.shields.io/pypi/v/gcloud-aio-bigquery.svg?style=flat-square
