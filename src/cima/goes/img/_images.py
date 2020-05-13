@@ -150,9 +150,7 @@ class ImageResolution:
 
 def get_image_inches(image):
     x, y = image.shape[:2]
-    # correction = (1.291, 1.298)
-    correction = (1.0, 1.0)
-    return ImageResolution(DUMMY_DPI, x / float(DUMMY_DPI) * correction[0], y / float(DUMMY_DPI) * correction[1])
+    return ImageResolution(DUMMY_DPI, x / float(DUMMY_DPI), y / float(DUMMY_DPI))
 
 
 def save_image(image,
@@ -324,4 +322,21 @@ def stream2pil(image_stream) -> Image:
     return Image.open(image_stream).convert('RGB')
 
 
+def get_true_colors(red, veggie, blue):
+    R = np.clip(red, 0, 1)
+    G = np.clip(veggie, 0, 1)
+    B = np.clip(blue, 0, 1)
+    gamma = 2.2
+    R = np.power(R, 1 / gamma)
+    G = np.power(G, 1 / gamma)
+    B = np.power(B, 1 / gamma)
+    G_true = 0.45 * R + 0.1 * G + 0.45 * B
+    G_true = np.clip(G_true, 0, 1)
+    RGB = np.dstack([R, G_true, B])
+    return RGB
 
+
+def apply_albedo(data):
+    albedo = (data * np.pi * 0.3) / 663.274497
+    albedo = np.clip(albedo, 0, 1)
+    return np.power(albedo, 1.5)

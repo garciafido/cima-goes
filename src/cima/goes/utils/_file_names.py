@@ -86,11 +86,10 @@ class Band(IntEnum):
     DIRTY_LONGWAVE_WINDOW = 15, '15: Dirty longwave window'
     CO2_LONGWAVE_INFRARED = 16, '16: CO2 longwave infrared'
 
-
 @dataclass
 class ProductBand:
     product: Product
-    band: Band
+    band: Band = None
     subproduct: int = None
 
 
@@ -115,12 +114,13 @@ def day_path_prefix(year: int, month: int, day: int, product=Product.CMIPF):
 
 def file_name(band: Band, product=Product.CMIPF, mode=ANY_MODE, subproduct: int = None):
     subp = subproduct if subproduct is not None else ''
-    return f'{OR}_{product.value}{subp}-{mode}C{band:02d}_{G16}'
-
+    band_str = f'C{band:02d}' if band is not None else ''
+    return f'{OR}_{product.value}{subp}-{mode}{band_str}_{G16}'
 
 def hour_file_name(hour: int, band: Band, product=Product.CMIPF, mode=ANY_MODE, subproduct: int = None):
     subp = subproduct if subproduct is not None else ''
-    return f'{hour:02d}/{OR}_{product.value}{subp}-{mode}C{band:02d}_{G16}'
+    band_str = f'C{band:02d}' if band is not None else ''
+    return f'{hour:02d}/{OR}_{product.value}{subp}-{mode}{band_str}_{G16}'
 
 
 def file_regex_pattern(band: Band, product: Product = Product.CMIPF, mode: str = ANY_MODE, subproduct: int = None):
