@@ -322,18 +322,44 @@ def stream2pil(image_stream) -> Image:
     return Image.open(image_stream).convert('RGB')
 
 
+def contrast_correction(color, contrast):
+    """
+    Modify the contrast of an R, G, or B color channel
+    See: #www.dfstudios.co.uk/articles/programming/image-programming-algorithms/image-processing-algorithms-part-5-contrast-adjustment/
+    Input:
+        C - contrast level
+    """
+    F = (259*(contrast + 255))/(255.*259-contrast)
+    COLOR = F*(color-.5)+.5
+    COLOR = np.minimum(COLOR, 1)
+    COLOR = np.maximum(COLOR, 0)
+    return COLOR
+
+
 def get_true_colors(red, veggie, blue):
-    R = np.clip(red, 0, 1)
-    G = np.clip(veggie, 0, 1)
-    B = np.clip(blue, 0, 1)
-    gamma = 2.2
-    R = np.power(R, 1 / gamma)
-    G = np.power(G, 1 / gamma)
-    B = np.power(B, 1 / gamma)
-    G_true = 0.45 * R + 0.1 * G + 0.45 * B
-    G_true = np.clip(G_true, 0, 1)
-    RGB = np.dstack([R, G_true, B])
-    return RGB
+    # Turn empty values into nans
+    red[red == -1] = np.nan
+    veggie[veggie == -1] = np.nan
+    blue[blue == -1] = np.nan
+
+    R = np.maximum(red, 0)
+    R = np.minimum(red, 1)
+    G = np.maximum(veggie, 0)
+    G = np.minimum(veggie, 1)
+    B = np.maximum(blue, 0)
+    B = np.minimum(blue, 1)
+
+    gamma = 0.4
+    R = np.power(R, gamma)
+    G = np.power(G, gamma)
+    B = np.power(B, gamma)
+
+    G_true = 0.48358168 * R + 0.45706946 * B + 0.06038137 * G
+    G_true = np.maximum(G_true, 0)
+    G_true = np.minimum(G_true, 1)
+
+    contrast = 125
+    return contrast_correction(np.dstack([R, G_true, B]), contrast)
 
 
 def apply_albedo(data):
