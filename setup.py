@@ -8,7 +8,7 @@ from distutils.core import setup
 
 setup(
     name='cima.goes',
-    version='1.1.b87',
+    version='1.1.b88',
     description='GOES-16 File Processing',
     author='Fido Garcia',
     author_email='garciafido@gmail.com',

@@ -4,6 +4,7 @@ import netCDF4
 from collections import namedtuple
 from typing import List, Dict, Tuple
 import google.cloud.storage as gcs
+from google.auth.credentials import AnonymousCredentials
 from cima.goes.utils._file_names import ProductBand, GOES_PUBLIC_BUCKET
 from google.oauth2 import service_account
 from cima.goes.utils._file_names import file_regex_pattern, path_prefix, slice_obs_start, Product
@@ -73,6 +74,14 @@ class GCS(GoesStorage):
     #
     # GoesStorage methods
     #
+    def get_client(self):
+        if self.credentials_as_dict:
+            client = gcs.Client(project="<none>", credentials=self.credentials)
+        else:
+            client = gcs.Client(project="<none>", credentials=AnonymousCredentials())
+        client.project = None
+        return client
+
     def get_dataset(self, blob: GoesBlob) -> netCDF4.Dataset:
         data = self.download_from_blob(blob)
         return netCDF4.Dataset("in_memory_file", mode='r', memory=data)
@@ -109,7 +118,7 @@ class GCS(GoesStorage):
         return in_memory_file.read()
 
     def download_as_stream(self, filepath):
-        client = gcs.Client(credentials=self.credentials, project='')
+        client = self.get_client()
         bucket = client.get_bucket(self.bucket)
         blob = bucket.blob(filepath)
         return self.download_from_blob(blob)
@@ -119,12 +128,12 @@ class GCS(GoesStorage):
         return netCDF4.Dataset("in_memory_file", mode='r', memory=data)
 
     def list_blobs(self, path: str, delimiter='/'):
-        client = gcs.Client(credentials=self.credentials, project='')
+        client = self.get_client()
         bucket = client.get_bucket(self.bucket)
         return bucket.list_blobs(prefix=path, delimiter=delimiter)
 
     def get_blob(self, name: str):
-        client = gcs.Client(credentials=self.credentials, project='')
+        client = self.get_client()
         bucket = client.get_bucket(self.bucket)
         return bucket.blob(name)
 
