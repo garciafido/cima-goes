@@ -265,7 +265,7 @@ def get_image_stream(
             fig.add_axes(ax)
 
         buffer = io.BytesIO()
-        res = plt.savefig(buffer, format=format, dpi=image_inches.dpi, bbox_inches='tight', pad_inches=0)
+        res = plt.savefig(buffer, format=format, dpi=image_inches.dpi, pad_inches=0)
         buffer.seek(0)
         return buffer
     finally:

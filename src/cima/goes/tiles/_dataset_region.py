@@ -215,7 +215,7 @@ def get_data(dataset, indexes: RegionIndexes = None, variable: str = None):
     return data
 
 
-def save_netcdf(filename: str, dataset, indexes: RegionIndexes = None, variable: str = None):
+def save_netcdf(filename: str, dataset, indexes: RegionIndexes = None, variable: str = None, compressed=True):
     if variable is None:
         if 'CMI' in dataset.variables:
             variable = 'CMI'
@@ -231,7 +231,7 @@ def save_netcdf(filename: str, dataset, indexes: RegionIndexes = None, variable:
     clipped_dataset.createDimension('y', data.shape[1])
 
     # create latitude axis
-    new_lats = clipped_dataset.createVariable('lats', lats.dtype, ('x', 'y'))
+    new_lats = clipped_dataset.createVariable('lats', lats.dtype, ('x', 'y'), zlib=compressed)
     new_lats.standard_name = 'latitude'
     new_lats.long_name = 'latitude'
     new_lats.units = 'degrees_north'
@@ -239,7 +239,7 @@ def save_netcdf(filename: str, dataset, indexes: RegionIndexes = None, variable:
     new_lats[:,:] = lats[:,:]
 
     # create longitude axis
-    new_lons = clipped_dataset.createVariable('lons', lons.dtype, ('x', 'y'))
+    new_lons = clipped_dataset.createVariable('lons', lons.dtype, ('x', 'y'), zlib=compressed)
     new_lons.standard_name = 'longitude'
     new_lons.long_name = 'longitude'
     new_lons.units = 'degrees_east'
@@ -247,7 +247,7 @@ def save_netcdf(filename: str, dataset, indexes: RegionIndexes = None, variable:
     new_lons[:,:] = lons[:,:]
 
     # create variable array
-    new_data = clipped_dataset.createVariable(data.name, data.dtype, ('x', 'y'))
+    new_data = clipped_dataset.createVariable(data.name, data.dtype, ('x', 'y'), zlib=compressed)
     new_data.long_name = data.long_name
     new_data.units = data.units
     new_data[:,:] = data[:,:]
