@@ -53,7 +53,7 @@ def compose_rgb(dataset_red, dataset_veggie, dataset_blue,
 
 def get_cropped_cv2_image(image, x: int, y: int, width, height):
     image_shape = image.shape
-    return image[x:min(x+width, image_shape[0]), y:min(y+height, image_shape[1])]
+    return image[x:min(x+width, image_shape[1]), y:min(y+height, image_shape[0])]
 
 
 def get_clipped(image, image_region: LatLonRegion, clip: LatLonRegion):
@@ -149,7 +149,7 @@ class ImageResolution:
 
 
 def get_image_inches(image):
-    x, y = image.shape[:2]
+    y, x = image.shape[:2]
     return ImageResolution(DUMMY_DPI, x / float(DUMMY_DPI), y / float(DUMMY_DPI))
 
 
