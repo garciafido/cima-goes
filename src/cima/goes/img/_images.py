@@ -1,26 +1,195 @@
 import io
 import os
-import cv2
 from dataclasses import dataclass
-from typing import Tuple
-import numpy as np
+from enum import Enum
 import cartopy
 import cartopy.crs as ccrs
+import cv2
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
+import numpy as np
+from PIL import Image
 from cima.goes.storage._file_systems import Storage
 from cima.goes.tiles import DatasetRegion, LatLonRegion, get_tile_extent
 from cima.goes.utils.load_cpt import load_cpt
 from matplotlib.axes import Axes
-from PIL import Image
 
 
 LOCAL_BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 DUMMY_DPI = 1000
 
 
+class Color(Enum):
+    ALICEBLUE = 'aliceblue',
+    ANTIQUEWHITE = 'antiquewhite',
+    AQUA = 'aqua',
+    AQUAMARINE = 'aquamarine',
+    AZURE = 'azure',
+    BEIGE = 'beige',
+    BISQUE = 'bisque',
+    BLACK = 'black',
+    BLANCHEDALMOND = 'blanchedalmond',
+    BLUE = 'blue',
+    BLUEVIOLET = 'blueviolet',
+    BROWN = 'brown',
+    BURLYWOOD = 'burlywood',
+    CADETBLUE = 'cadetblue',
+    CHARTREUSE = 'chartreuse',
+    CHOCOLATE = 'chocolate',
+    CORAL = 'coral',
+    CORNFLOWERBLUE = 'cornflowerblue',
+    CORNSILK = 'cornsilk',
+    CRIMSON = 'crimson',
+    CYAN = 'cyan',
+    DARKBLUE = 'darkblue',
+    DARKCYAN = 'darkcyan',
+    DARKGOLDENROD = 'darkgoldenrod',
+    DARKGRAY = 'darkgray',
+    DARKGREEN = 'darkgreen',
+    DARKGREY = 'darkgrey',
+    DARKKHAKI = 'darkkhaki',
+    DARKMAGENTA = 'darkmagenta',
+    DARKOLIVEGREEN = 'darkolivegreen',
+    DARKORANGE = 'darkorange',
+    DARKORCHID = 'darkorchid',
+    DARKRED = 'darkred',
+    DARKSALMON = 'darksalmon',
+    DARKSEAGREEN = 'darkseagreen',
+    DARKSLATEBLUE = 'darkslateblue',
+    DARKSLATEGRAY = 'darkslategray',
+    DARKSLATEGREY = 'darkslategrey',
+    DARKTURQUOISE = 'darkturquoise',
+    DARKVIOLET = 'darkviolet',
+    DEEPPINK = 'deeppink',
+    DEEPSKYBLUE = 'deepskyblue',
+    DIMGRAY = 'dimgray',
+    DIMGREY = 'dimgrey',
+    DODGERBLUE = 'dodgerblue',
+    FIREBRICK = 'firebrick',
+    FLORALWHITE = 'floralwhite',
+    FORESTGREEN = 'forestgreen',
+    FUCHSIA = 'fuchsia',
+    GAINSBORO = 'gainsboro',
+    GHOSTWHITE = 'ghostwhite',
+    GOLD = 'gold',
+    GOLDENROD = 'goldenrod',
+    GRAY = 'gray',
+    GREEN = 'green',
+    GREENYELLOW = 'greenyellow',
+    GREY = 'grey',
+    HONEYDEW = 'honeydew',
+    HOTPINK = 'hotpink',
+    INDIANRED = 'indianred',
+    INDIGO = 'indigo',
+    IVORY = 'ivory',
+    KHAKI = 'khaki',
+    LAVENDER = 'lavender',
+    LAVENDERBLUSH = 'lavenderblush',
+    LAWNGREEN = 'lawngreen',
+    LEMONCHIFFON = 'lemonchiffon',
+    LIGHTBLUE = 'lightblue',
+    LIGHTCORAL = 'lightcoral',
+    LIGHTCYAN = 'lightcyan',
+    LIGHTGOLDENRODYELL = 'lightgoldenrodyell'
+    LIGHTGRAY = 'lightgray',
+    LIGHTGREEN = 'lightgreen',
+    LIGHTGREY = 'lightgrey',
+    LIGHTPINK = 'lightpink',
+    LIGHTSALMON = 'lightsalmon',
+    LIGHTSEAGREEN = 'lightseagreen',
+    LIGHTSKYBLUE = 'lightskyblue',
+    LIGHTSLATEGRAY = 'lightslategray',
+    LIGHTSLATEGREY = 'lightslategrey',
+    LIGHTSTEELBLUE = 'lightsteelblue',
+    LIGHTYELLOW = 'lightyellow',
+    LIME = 'lime',
+    LIMEGREEN = 'limegreen',
+    LINEN = 'linen',
+    MAGENTA = 'magenta',
+    MAROON = 'maroon',
+    MEDIUMAQUAMARINE = 'mediumaquamarine',
+    MEDIUMBLUE = 'mediumblue',
+    MEDIUMORCHID = 'mediumorchid',
+    MEDIUMPURPLE = 'mediumpurple',
+    MEDIUMSEAGREEN = 'mediumseagreen',
+    MEDIUMSLATEBLUE = 'mediumslateblue',
+    MEDIUMSPRINGGREEN = 'mediumspringgreen',
+    MEDIUMTURQUOISE = 'mediumturquoise',
+    MEDIUMVIOLETRED = 'mediumvioletred',
+    MIDNIGHTBLUE = 'midnightblue',
+    MINTCREAM = 'mintcream',
+    MISTYROSE = 'mistyrose',
+    MOCCASIN = 'moccasin',
+    NAVAJOWHITE = 'navajowhite',
+    NAVY = 'navy',
+    OLDLACE = 'oldlace',
+    OLIVE = 'olive',
+    OLIVEDRAB = 'olivedrab',
+    ORANGE = 'orange',
+    ORANGERED = 'orangered',
+    ORCHID = 'orchid',
+    PALEGOLDENROD = 'palegoldenrod',
+    PALEGREEN = 'palegreen',
+    PALETURQUOISE = 'paleturquoise',
+    PALEVIOLETRED = 'palevioletred',
+    PAPAYAWHIP = 'papayawhip',
+    PEACHPUFF = 'peachpuff',
+    PERU = 'peru',
+    PINK = 'pink',
+    PLUM = 'plum',
+    POWDERBLUE = 'powderblue',
+    PURPLE = 'purple',
+    REBECCAPURPLE = 'rebeccapurple',
+    RED = 'red',
+    ROSYBROWN = 'rosybrown',
+    ROYALBLUE = 'royalblue',
+    SADDLEBROWN = 'saddlebrown',
+    SALMON = 'salmon',
+    SANDYBROWN = 'sandybrown',
+    SEAGREEN = 'seagreen',
+    SEASHELL = 'seashell',
+    SIENNA = 'sienna',
+    SILVER = 'silver',
+    SKYBLUE = 'skyblue',
+    SLATEBLUE = 'slateblue',
+    SLATEGRAY = 'slategray',
+    SLATEGREY = 'slategrey',
+    SNOW = 'snow',
+    SPRINGGREEN = 'springgreen',
+    STEELBLUE = 'steelblue',
+    TAN = 'tan',
+    TEAL = 'teal',
+    THISTLE = 'thistle',
+    TOMATO = 'tomato',
+    TURQUOISE = 'turquoise',
+    VIOLET = 'violet',
+    WHEAT = 'wheat',
+    WHITE = 'white',
+    WHITESMOKE = 'whitesmoke',
+    YELLOW = 'yellow',
+    YELLOWGREEN = 'yellowgreen'
+
+
+class LineStyle(Enum):
+    SOLID = 'solid',
+    DASHED = 'dashed',
+    DASHDOT = 'dashdot',
+    DOTTED = 'dotted'
+
+
+@dataclass
+class Grid:
+    step: float = 1
+    color: Color = Color.BLACK
+    linestyle: LineStyle = LineStyle.SOLID
+    linewidth: float = 0.1
+    draw_labels: bool = False
+    xlabels_top: bool = False
+    ylabels_right: bool = False
+
+
 def _resize(image, new_size):
-  return cv2.resize(image, dsize=new_size, interpolation=cv2.INTER_CUBIC)
+    return cv2.resize(image, dsize=new_size, interpolation=cv2.INTER_CUBIC)
 
 
 def compose_rgb(dataset_red, dataset_veggie, dataset_blue,
@@ -53,18 +222,18 @@ def compose_rgb(dataset_red, dataset_veggie, dataset_blue,
 
 def get_cropped_cv2_image(image, x: int, y: int, width, height):
     image_shape = image.shape
-    return image[x:min(x+width, image_shape[1]), y:min(y+height, image_shape[0])]
+    return image[x:min(x + width, image_shape[1]), y:min(y + height, image_shape[0])]
 
 
 def get_clipped(image, image_region: LatLonRegion, clip: LatLonRegion):
     image_height, image_width, _ = image.shape
-    pixels_per_lon = image_width / abs(image_region.lon_east-image_region.lon_west)
-    pixels_per_lat = image_height / abs(image_region.lat_south-image_region.lat_north)
-    x = int(pixels_per_lon * abs(image_region.lon_east-clip.lon_east))
-    y = int(pixels_per_lat * abs(image_region.lat_north-clip.lat_north))
-    width = int(pixels_per_lon * abs(clip.lon_east-clip.lon_west))
-    height = int(pixels_per_lat * abs(clip.lat_south-clip.lat_north))
-    return image[y:min(y+height, image_height), x:min(x+width, image_width)]
+    pixels_per_lon = image_width / abs(image_region.lon_east - image_region.lon_west)
+    pixels_per_lat = image_height / abs(image_region.lat_south - image_region.lat_north)
+    x = int(pixels_per_lon * abs(image_region.lon_east - clip.lon_east))
+    y = int(pixels_per_lat * abs(image_region.lat_north - clip.lat_north))
+    width = int(pixels_per_lon * abs(clip.lon_east - clip.lon_west))
+    height = int(pixels_per_lat * abs(clip.lat_south - clip.lat_north))
+    return image[y:min(y + height, image_height), x:min(x + width, image_width)]
 
 
 def add_cultural(ax):
@@ -86,17 +255,20 @@ def add_cultural(ax):
     ax.add_feature(states_provinces, edgecolor='white', linewidth=linewidth)
 
 
-def add_grid(ax, draw_labels=False, step=2):
-    linewidth = 1.25
-    gl = ax.gridlines(linewidth=linewidth,
-                      linestyle='dotted',
-                      color='gray',
-                      crs=ccrs.PlateCarree(),
-                      draw_labels=draw_labels)
+def add_grid(ax, crs=None, grid: Grid = None):
+    if crs is None:
+        crs = ccrs.PlateCarree()
+    grid = grid.__dict__ if grid is not None else Grid()
+    step = grid.pop('step')
+    xlabels_top = grid.pop('xlabels_top')
+    ylabels_right = grid.pop('ylabels_right')
+    grid['color'] = grid['color'].value
+    grid['linestyle'] = grid['linestyle'].value
+    gl = ax.gridlines(crs=crs, **grid)
     gl.xlocator = mticker.FixedLocator([x for x in range(-180, 180, step)])
     gl.ylocator = mticker.FixedLocator([x for x in range(-180, 180, step)])
-    gl.xlabels_top = False
-    gl.ylabels_right = False
+    gl.xlabels_top = xlabels_top
+    gl.ylabels_right = ylabels_right
 
 
 def get_cloud_tops_palette():
@@ -168,7 +340,7 @@ def save_image(image,
         if file_extension[0] == '.':
             format = file_extension[1:]
     figure = get_image_stream(image, lats, lons, lonlat_region, format=format, cmap=cmap, vmin=vmin, vmax=vmax,
-                    draw_cultural=draw_cultural, draw_grid=draw_grid, trim_excess=trim_excess)
+                              draw_cultural=draw_cultural, draw_grid=draw_grid, trim_excess=trim_excess)
     storage.upload_data(figure, filepath)
     figure.seek(0)
     return figure
@@ -180,7 +352,8 @@ def getfig(image,
            format='png',
            projection=ccrs.PlateCarree(),
            cmap=None, vmin=None, vmax=None,
-           draw_cultural=False, draw_grid=False,
+           draw_cultural=False,
+           grid: Grid = None,
            trim_excess=0):
     image_inches = get_image_inches(image)
     fig = plt.figure(frameon=False)
@@ -195,8 +368,8 @@ def getfig(image,
 
         if draw_cultural:
             add_cultural(ax)
-        if draw_grid:
-            add_grid(ax)
+        if grid is not None:
+            add_grid(ax, crs=projection, grid=grid)
         else:
             ax.axis('off')
         pcolormesh(ax, image, lons, lats, cmap=cmap, vmin=vmin, vmax=vmax)
@@ -230,9 +403,8 @@ def get_image_stream(
         vmin=None,
         vmax=None,
         draw_cultural=False,
-        draw_grid=False,
+        grid: Grid = None,
         title: str = None,
-        grid_step=1,
         trim_excess=0):
     image_inches = get_image_inches(data)
     fig = plt.figure(frameon=False)
@@ -251,8 +423,8 @@ def get_image_stream(
         fig.set_size_inches(image_inches.x, image_inches.y)
         if draw_cultural:
             add_cultural(ax)
-        if draw_grid:
-            add_grid(ax, step=grid_step)
+        if grid is not None:
+            add_grid(ax, crs=projection, grid=grid)
         if title is not None:
             ax.title.set_text(title)
         ax.axis('off')
@@ -281,11 +453,11 @@ def get_pil_image(
         draw_cultural=False, draw_grid=False,
         trim_excess=0):
     image_stream = get_image_stream(image,
-           lats=lats, lons=lons,
-           region=region,
-           cmap=cmap, vmin=vmin, vmax=vmax,
-           draw_cultural=draw_cultural, draw_grid=draw_grid,
-           trim_excess=trim_excess)
+                                    lats=lats, lons=lons,
+                                    region=region,
+                                    cmap=cmap, vmin=vmin, vmax=vmax,
+                                    draw_cultural=draw_cultural, draw_grid=draw_grid,
+                                    trim_excess=trim_excess)
     return Image.open(image_stream)
 
 
@@ -295,7 +467,7 @@ def pil2cv(pil_image: Image):
 
 
 def cv2pil(cv_image: Image):
-    img =  cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
+    img = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
     return Image.fromarray(img)
 
 
@@ -329,8 +501,8 @@ def contrast_correction(color, contrast):
     Input:
         C - contrast level
     """
-    F = (259*(contrast + 255))/(255.*259-contrast)
-    COLOR = F*(color-.5)+.5
+    F = (259 * (contrast + 255)) / (255. * 259 - contrast)
+    COLOR = F * (color - .5) + .5
     COLOR = np.minimum(COLOR, 1)
     COLOR = np.maximum(COLOR, 0)
     return COLOR
