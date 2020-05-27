@@ -184,8 +184,8 @@ class Grid:
     linestyle: LineStyle = LineStyle.SOLID
     linewidth: float = 0.1
     draw_labels: bool = False
-    xlabels_top: bool = False
-    ylabels_right: bool = False
+    top_labels: bool = False
+    right_labels: bool = False
 
 
 def _resize(image, new_size):
@@ -260,15 +260,15 @@ def add_grid(ax, crs=None, grid: Grid = None):
         crs = ccrs.PlateCarree()
     grid = grid.__dict__ if grid is not None else Grid()
     step = grid.pop('step')
-    xlabels_top = grid.pop('xlabels_top')
-    ylabels_right = grid.pop('ylabels_right')
+    top_labels = grid.pop('top_labels')
+    right_labels = grid.pop('right_labels')
     grid['color'] = grid['color'].value
     grid['linestyle'] = grid['linestyle'].value
     gl = ax.gridlines(crs=crs, **grid)
     gl.xlocator = mticker.FixedLocator([x for x in range(-180, 180, step)])
     gl.ylocator = mticker.FixedLocator([x for x in range(-180, 180, step)])
-    gl.xlabels_top = xlabels_top
-    gl.ylabels_right = ylabels_right
+    gl.top_labels = top_labels
+    gl.right_labels = right_labels
 
 
 def get_cloud_tops_palette():
